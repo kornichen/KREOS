@@ -1,0 +1,180 @@
+local w, h = term.getSize()
+
+orbitScreenList = {}
+orbitBoxList = {}
+
+-- ====================
+-- Orbit Box API
+-- ====================
+
+function createOrbitScreen(internalName)
+	local check = true
+	if not(orbitScreenList == {}) then
+		for i=1,#orbitScreenList,1 do
+			if(internalName[1]==orbitScreenList[i][1]) then check = false end
+		end
+	end
+	
+	if check then
+		orbitScreenList[#orbitScreenList+1] = {internalName}
+		orbitRefresh(internalName)
+	end
+	
+	term.setTextColor(colors.cyan)
+	term.setBackgroundColor(colors.white)
+	term.clear()
+	term.setBackgroundColor(colors.gray)
+	-- for y=1, h do
+		-- for x=1, 8 do
+			-- term.setCursorPos(x, y)
+			-- write(" ")
+		-- end
+	-- end
+	
+	for y=1, h do
+		term.setCursorPos(11,y)
+		write(" ")
+	end
+end
+
+function enableScreen(tempOrbit)
+	for i=1,#orbitBoxList,1 do
+		if(tempOrbit == orbitBoxList[i][2]) then
+			orbitBoxList[i][6] = true
+		end
+	end
+	orbitRefresh(internalName)
+end
+
+function disableScreen(tempOrbit)
+	for i=1,#orbitBoxList,1 do
+		if(tempOrbit == orbitBoxList[i][2]) then
+			orbitBoxList[i][6] = false
+		end
+	end
+	orbitRefresh(internalName)
+end
+
+function addOrbit(internalName, orbit, text, x, y, isVisible, color, onClick)
+	local check = true
+	if not(orbitBoxList == {}) then
+		for i=1,#orbitBoxList,1 do
+			if(internalName[1]==orbitBoxList[i][1]) then check = false end
+		end
+	end
+	
+	if check then
+		orbitBoxList[#orbitBoxList+1] = {internalName, orbit, text, x, y, isVisible, color, onClick}
+		orbitRefresh(orbit)
+	end
+end
+
+function toggleOrbit(internalName)
+	for id,button in ipairs(orbitBoxList) do
+		if(internalName == orbitBoxList[id][1]) then
+			if(orbitBoxList[id][6] == true) then
+				orbitBoxList[id][6] = false
+			else
+				orbitBoxList[id][6] = true
+			end
+		end
+	end
+end
+
+function enableOrbit(internalName)
+	for id, button in ipairs(orbitBoxList) do
+		if(internalName == orbitBoxList[id][1]) then
+			orbitBoxList[id][6] = true
+			return true
+		end
+	end
+	return false
+end
+
+function disableOrbit(internalName)
+	for id, button in ipairs(orbitBoxList) do
+		if(internalName == orbitBoxList[id][1]) then
+			orbitBoxList[id][6] = false
+			return true
+		end
+	end
+	return false
+end
+
+function removeOrbit(internalName)
+	for i=1,#orbitBoxList,1 do
+		if(internalName == orbitBoxList[i][1]) then
+			local orbit = orbitBoxList[i][2]
+			table.remove(orbitBoxList, i)
+			orbitRefresh(orbit)
+		end
+	end
+end
+
+function changeOrbitText(internalName, newText)
+	for i=1,#orbitBoxList,1 do
+		if(internalName == orbitBoxList[i][1]) then
+			orbitBoxList[i][3] = newText
+			orbitRefresh(orbitBoxList[i][2])
+		end
+	end
+end
+
+function changeOrbitOnClick(internalName, newOnClick)
+	for i=1,#orbitBoxList,1 do
+		if(internalName == orbitBoxList[i][1]) then
+			orbitBoxList[i][7] = newOnClick
+			orbitRefresh(orbitBoxList[i][2])
+		end
+	end
+end
+
+function orbitRefresh(orbit)
+	for i=1,#orbitBoxList,1 do
+		if orbitBoxList[i][2] == orbit then
+			if orbitBoxList[i][6] == true then
+				if orbitBoxList[i][7] ~= colors.cyan then
+					term.setTextColor(colors.cyan)
+				elseif orbitBoxList[i][7] == colors.cyan then
+					term.setTextColor(colors.gray)
+				end
+				term.setBackgroundColor(orbitBoxList[i][7])
+				startX = orbitBoxList[i][4]
+				startY = orbitBoxList[i][5]
+				term.setCursorPos(startX,startY)
+				for y=1, 5 do
+					for x=1, 8 do
+						term.setCursorPos(startX-1+x, startY-1+y)
+						print(" ")
+					end
+				end
+				
+				x = 1
+				y = 1
+				for letter in string.gmatch(orbitBoxList[i][3], ".") do
+					term.setCursorPos(startX+x, startY+y)
+					write(letter)
+					if x == 6 then
+						x = 0
+						y = y + 1
+					end
+					x = x + 1
+				end
+			end
+		end
+	end
+end
+
+function PullEvent(tempOrbit)
+	local eventType, button, x, y, i1, i2, i3 = os.pullEvent()
+	if not (eventType=="mouse_click" or eventType=="monitor_touch") then
+		return eventType, button, x, y, i1, i2, i3
+	end
+	for i=1,#orbitBoxList,1 do
+		if tempOrbit == orbitBoxList[i][2] and x >= orbitBoxList[i][4] and x < orbitBoxList[i][4]+8 and y >= orbitBoxList[i][5] and y < orbitBoxList[i][5]+5 then
+			orbitBoxList[i][8](orbitBoxList[i][1])
+			return PullEvent()
+		end
+	end
+	return eventType, button, x, y, i1, i2, i3
+end

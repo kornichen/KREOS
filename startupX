@@ -1,0 +1,167 @@
+if not load then
+	os.loadAPI("/kreos/api/load")
+end
+
+-- local kreosLogo = {
+	-- " 7    7 77777   7777   7777   777 ",
+	-- " 7    7 7    7 7      7    7 7    ",
+	-- " 7   7  7    7 7      7    7 7    ",
+	-- " 7   7  7    7 7      7    7  77  ",
+	-- " 7777   77777   7777  7    7    7 ",
+	-- " 7   7  7    7 7      7    7    7 ",
+	-- " 7   7  7    7 7       7777  777  ",
+	-- " 7    7 7    7 7                  ",
+	-- " 7    7 7    7  77777777777777777 ",
+-- }
+
+local kreosLogo = {
+	"3   3 3333  3333  777   777             bbb    ",
+	"3   3 3   3 3    7   7 7                  b    ",
+	"3  3  3   3 3    7   7 7    333  3  b     b bbb",
+	"3  3  3   3 3    7   7  77  3 3  3   3  bbb b b",
+	"333   3333  333  7   7    7 3 3bb333b33 b   b b",
+	"3  3  3   3 3    7   7    7 3 3b 3 3b3  b   b b",
+	"3  3  3   3 3     777  777  333b 333b33 bbb3bbb",
+	"3   3 3   3 3                                  ",
+	"3   3 3   3 33333333333333333333333333333333333",
+}
+
+local bar = load.init(load.LOGO_IS_LOAD, kreosLogo, 5, nil, 18, colors.red, "Starting KREOS...", "KREOS Orbit V2.0  >>> BETA <<<", "By kornichen")
+
+local w, h = term.getSize()
+
+local function startup()
+	bar:triggerUpdate("Loading API's... (1/2)")
+	sleep(0.5)
+	if not kapi20 then
+		os.loadAPI("/kreos/api/kapi20")
+	end
+	bar:triggerUpdate("Loading API's... (2/2)")
+	sleep(0.5)
+	if not config then
+		os.loadAPI("/kreos/api/config")
+	end
+	if not esl then
+		os.loadAPI("/kreos/api/esl")
+	end
+	bar:triggerUpdate("Loading Files...")
+	sleep(0.5)
+	kreConfig = config.new("/kreos/config/config.kre")
+	kreConfig:load()
+	kreUsers = config.new("/kreos/config/users.kre")
+	kreUsers:load()
+	bar:triggerUpdate("Preparing KREOS...")
+	sleep(0.5)
+	firstStart = kreConfig:getBoolean("firstStart", true)
+	kreConfig:addCommentForKey("firstStart", "Do not change this or KREOS will not work anymore!")
+	if firstStart == true then
+		users = kreUsers:getNumber("users", 1)
+		kreUsers:addCommentForKey("users", "Number of users")
+	end
+	bar:triggerUpdate("Welcome to KREOS!")
+	sleep(0.5)
+	kreConfig:save()
+	kreUsers:save()
+end
+ 
+local function startupbar()
+	bar:run(true)
+end
+ 
+parallel.waitForAll(startupbar, startup)
+
+-- ==============
+--  Login Screen
+-- ==============
+
+if firstStart == true then
+	
+	kapi20.createWindow("FirstStart", "First Start of KREOS", 1, 1, w, h, false, false, true, false, true)
+	kapi20.addLabel("label1", "Thank you for downloading KREOS!", math.ceil(w/2)-math.ceil(string.len("Thank you for downloading KREOS!")/2), 3, true)
+	kapi20.addButton("button1", "Continue", math.ceil(w/2)-math.ceil(string.len("Continue")/2), 5, true, function(button)
+		kapi20.removeButton("button1")
+		kapi20.removeLabel("label1")
+		kapi20.createWindow("FirstStart2", "First Start of KREOS", 1, 1, w, h, false, false, true, false, true)
+		kapi20.addLabel("label2", "Please enter your Name and a passwort", math.ceil(w/2)-math.ceil(string.len("Please enter your Name and a passwort")/2), 3, true)
+		kapi20.addLabel("label3", "below this text.", math.ceil(w/2)-math.ceil(string.len("below this text.")/2), 4, true)
+		kapi20.addLabel("label4", "Username:", math.ceil(w/2)-math.ceil(string.len("Username:")/2), 6, true)
+		kapi20.addInputBox("username", 11, math.ceil(w/2)-math.ceil(11/2), 7, true, "text", nil)
+		kapi20.addLabel("label5", "Password:", math.ceil(w/2)-math.ceil(string.len("Password:")/2), 9, true)
+		kapi20.addInputBox("password", 11, math.ceil(w/2)-math.ceil(11/2), 10, true, "password", nil)
+		kapi20.addButton("button2", "Continue", math.ceil(w/2)-math.ceil(string.len("Continue")/2), 12, true, function(button)
+			
+			username = kapi20.inputBoxGetValue("username")
+			password = kapi20.inputBoxGetValue("password")
+			
+			if username == nil then
+				-- ...
+			end
+			if password == nil then
+				-- ...
+			end
+			if username ~= nil and password ~= nil then
+				tempUsername = kreUsers:getString("user1.username", username)
+				kreUsers:addCommentForKey("user1.username", "Username of User 1")
+				tempPassword = kreUsers:getString("user1.password", password)
+				kreUsers:addCommentForKey("user1.password", "Password of User 1 (Hashed)")
+			
+				kreUsers:save()
+			end
+			
+			kapi20.removeButton("button2")
+			kapi20.removeInputBox("username")
+			kapi20.removeInputBox("password")
+			kapi20.removeLabel("label2")
+			kapi20.removeLabel("label3")
+			kapi20.removeLabel("label4")
+			kapi20.removeLabel("label5")
+			kapi20.createWindow("FirstStart3", "First Start of KREOS", 1, 1, w, h, false, false, true, false, true)
+			kapi20.addLabel("label1", "Your done with configuration.", math.ceil(w/2)-math.ceil(string.len("Your done with configuration!")/2), 3, true)
+			kapi20.addLabel("label1", "Have fun with KREOS!", math.ceil(w/2)-math.ceil(string.len("Have fun with KREOS!")/2), 4, true)
+			kapi20.addLabel("label1", "~kornichen", math.ceil(w/2)-math.ceil(string.len("~kornichen")/2), 6, true)
+			
+			kapi20.addButton("button3", "Continue", math.ceil(w/2)-math.ceil(string.len("Continue")/2), 8, true, function(button)
+				
+				
+				kapi20.removeButton("button3")
+				shell.run("/kreos/sys")
+				
+				kreConfig:getBoolean("firstStart", false)
+				kreConfig:reset("firstStart")
+				kreConfig:save()
+				
+			end)
+		end)
+	end)
+	
+	while true do
+		local eventType, button, x, y, i1, i2, i3 = kapi20.pullEvent()
+		
+		sleep(0.1)
+	end
+	
+elseif firstStart == false then
+	
+	kapi20.createWindow("LoginScreen", "Login", 1, 1, w, h, false, false, true, false, true)
+	kapi20.addLabel("label1", "Username:", math.ceil(w/2)-math.ceil(string.len("Username:")/2), 4, true)
+	kapi20.addInputBox("username", 11, math.ceil(w/2)-math.ceil(11/2), 5, true, "text", nil)
+	kapi20.addLabel("label2", "Password:", math.ceil(w/2)-math.ceil(string.len("Password:")/2), 7, true)
+	kapi20.addInputBox("password", 11, math.ceil(w/2)-math.ceil(11/2), 8, true, "password", nil)
+	kapi20.addButton("button1", "Login", math.ceil(w/2)-math.ceil(string.len("Login")/2), 10, true, function(button)
+	
+		for i=1, kreUsers:getNumber("users", 1) do
+			if kreUsers:getString("user" ..i.. ".username", nil) == kapi20.inputBoxGetValue("username") then
+				if kreUsers:getString("user" ..i.. ".password", nil) == kapi20.inputBoxGetValue("password") then
+					shell.run("/kreos/sys")
+				end
+			end
+		end
+		os.reboot()
+	end)
+	
+	while true do
+		local eventType, button, x, y, i1, i2, i3 = kapi20.pullEvent()
+		
+		sleep(0.1)
+	end
+end

@@ -1,0 +1,312 @@
+-- KAPI.createHome(windowTitle, titleBarTextColor, titleBarBgColor, mainBgColor)
+-- KAPI.createWindow(internalName, windowTitle, x, y, endx, endy, hasCloseButton, hasLargeButton, hasMiniButton, titleBarTextColor, titleBarBgColor, mainBgColor, minimized)
+-- KAPI.windowGetSize(internalName)
+-- KAPI.addButton(internalName, text, color, x, y, enabled, onClick)
+-- KAPI.toggleButton(internalName)
+-- KAPI.enableButton(internalName)
+-- KAPI.disableButton(internalName)
+-- KAPI.removeButton(internalName)
+-- KAPI.changeButtonText(internalName, newText)
+-- KAPI.changeButtonColor(internalName, newColor)
+-- KAPI.changeButtonOnClick(internalName, newOnClick)
+-- KAPI.btnRefresh()
+-- KAPI.pullEvent()
+-- KAPI.fileLineTableWrite(path, t)
+-- KAPI.fileTableGet(path)
+-- KAPI.fileTextWrite(path, text)
+-- KAPI.fileLineReplace(path, line, text)
+-- KAPI.fileLineGet(path, line)
+
+INAME=1
+TEXT=2
+COLOR=3
+X=4
+Y=5
+ENABLED=6
+ONCLICK=7
+
+windowList = {}
+buttonList = {}
+labelList = {}
+inputBoxList = {}
+
+local w,h = term.getSize()
+
+-- ====================
+-- Only for KREOS
+-- ====================
+
+function createHome(windowTitle, titleBarTextColor, titleBarBgColor, mainBgColor)
+	term.setBackgroundColor(mainBgColor)
+	term.clear()
+	term.setCursorPos(1,1)
+	term.setBackgroundColor(titleBarBgColor)
+	term.clearLine()
+	term.setTextColor(titleBarTextColor)
+	term.setCursorPos(math.ceil(w/2)-math.ceil(string.len(windowTitle)/2), 1)
+    write(windowTitle)
+	term.setCursorPos(1,h)
+	term.clearLine()
+	term.setBackgroundColor(mainBgColor)
+	term.setTextColor(titleBarTextColor)
+end
+
+-- ====================
+-- Window API
+-- ====================
+
+function createWindow(internalName, windowTitle, x, y, endx, endy, hasCloseButton, hasLargeButton, hasMiniButton, titleBarTextColor, titleBarBgColor, mainBgColor, minimized)
+	if minimized == false then
+		local check = true
+		if not(windowList == {}) then
+			for i=1,#windowList,1 do
+				if(internalName[1]==windowList[i][INAME]) then check = false end
+			end
+		end
+		
+		if check then
+			windowList[#windowList+1] = {internalName, windowTitle, x, y, endx, endy, hasCloseButton, hasLargeButton, hasMiniButton, titleBarTextColor, titleBarBgColor, mainBgColor, minimized}
+		end
+		
+		local tempx = x
+		local tempy = y
+		local tempw = endx - x
+		local temph = endy - y
+		while tempy <= endy do
+			while tempx <= endx do
+				term.setCursorPos(tempx, tempy)
+				if tempy == y then
+					term.setBackgroundColor(titleBarBgColor)
+				elseif tempy == endy then
+					term.setBackgroundColor(titleBarBgColor)
+				else
+					term.setBackgroundColor(mainBgColor)
+				end
+				write(" ")
+				tempx = tempx + 1
+			end
+			tempx = x
+			tempy = tempy + 1
+		end
+		term.setTextColor(titleBarTextColor)
+		term.setCursorPos(math.ceil(tempw/2)-math.ceil(string.len(windowTitle)/2), y)
+		write(windowTitle)
+		term.setBackgroundColor(mainBgColor)
+		term.setTextColor(titleBarTextColor)
+		if hasCloseButton == true then
+			term.setCursorPos(x, y)
+			term.setBackgroundColor(colors.red)
+			write("X")
+			term.setBackgroundColor(colors.white)
+		end
+		if hasLargeButton == true then
+			term.setCursorPos(endx, y)
+			term.setBackgroundColor(colors.blue)
+			write("O")
+			term.setBackgroundColor(colors.white)
+		end
+		if hasMiniButton == true then
+			term.setCursorPos(endx-1, y)
+			term.setBackgroundColor(colors.green)
+			write("_")
+			term.setBackgroundColor(colors.white)
+		end
+	end
+end
+
+function windowGetSize(internalName)
+	for i=1,#windowList,1 do
+		if(internalName == windowList[i][1]) then
+			local tempw = windowList[i][5] - windowList[i][3]
+			local temph = windowList[i][6] - windowList[i][4]
+			return tempw, temph
+		end
+	end
+end
+
+function windowSetSize(internalNamex, x, y, endx, endy)
+	for i=1,#windowList,1 do
+		if(internalName == windowList[i][1]) then
+			windowList[i][3] = x
+			windowList[i][4] = y
+			windowList[i][5] = endx
+			windowList[i][6] = endy
+		end
+	end
+end
+
+function windowMinimize(internalName)
+	for i=1,#windowList,1 do
+		if(internalName == windowList[i][1]) then
+			if windowList[i][13] == true then
+				windowList[i][13] = false
+			elseif windowList[i][13] == false then
+				windowList[i][13] = true
+			end
+		end
+	end
+end
+
+-- ====================
+-- Button API
+-- ====================
+
+function addButton(internalName, text, color, x, y, enabled, onClick)
+	local check = true
+	if not(buttonList == {}) then
+		for i=1,#buttonList,1 do
+			if(internalName[1]==buttonList[i][INAME]) then check = false end
+		end
+	end
+	
+	if check then
+		buttonList[#buttonList+1] = {internalName, text, color, x, y, enabled, onClick}
+		btnRefresh()
+	end
+end
+
+function toggleButton(internalName)
+	for id,button in ipairs(buttonList) do
+		if(internalName == buttonList[i][1]) then
+			if(buttonList[i][6] == true) then
+				buttonList[i][6] = false
+			else
+				buttonList[i][6] = true
+			end
+		end
+	end
+end
+
+function enableButton(internalName)
+	for id, button in ipairs(buttonList) do
+		if(internalName == buttonList[i][1]) then
+			buttonList[i][6] = true
+			return true
+		end
+	end
+	return false
+end
+
+function disableButton(internalName)
+	for id, button in ipairs(buttonList) do
+		if(internalName == buttonList[i][1]) then
+			buttonList[i][6] = false
+			return true
+		end
+	end
+	return false
+end
+
+function removeButton(internalName)
+	for i=1,#buttonList,1 do
+		if(internalName == buttonList[i][1]) then
+			table.remove(buttonList, i)
+			btnRefresh()
+		end
+	end
+end
+
+function changeButtonText(internalName, newText)
+	for i=1,#buttonList,1 do
+		if(internalName == buttonList[i][1]) then
+			buttonList[i][2] = newText
+			btnRefresh()
+		end
+	end
+end
+
+function changeButtonColor(internalName, newColor)
+	for i=1,#buttonList,1 do
+		if(internalName == buttonList[i][1]) then
+			buttonList[i][3] = newColor
+			btnRefresh()
+		end
+	end
+end
+
+function changeButtonOnClick(internalName, newOnClick)
+	for i=1,#buttonList,1 do
+		if(internalName == buttonList[i][1]) then
+			buttonList[i][7] = newOnClick
+			btnRefresh()
+		end
+	end
+end
+
+function btnRefresh()
+	for i=1,#buttonList,1 do
+		term.setTextColor(colors.gray)
+		term.setBackgroundColor(buttonList[i][3])
+		startX = buttonList[i][4]
+		startY = buttonList[i][5]
+		term.setCursorPos(startX,startY)
+		write(buttonList[i][2])
+	end
+end
+
+-- ====================
+-- Event API
+-- ====================
+
+function pullEvent()
+	local eventType, button, x, y, i1, i2, i3 = os.pullEvent()
+	if not (eventType=="mouse_click" or eventType=="monitor_touch") then
+		return eventType, button, x, y, i1, i2, i3
+	end
+	for id, button in ipairs(buttonList) do
+		if button[ENABLED] == true and x >= button[X] and x < button[X]+string.len(button[TEXT]) and y == button[Y] then
+			button[ONCLICK](button[INAME])
+			return pullEvent()
+		end
+	end
+	return eventType, button, x, y, i1, i2, i3
+end
+
+-- ====================
+-- File API
+-- ====================
+
+function fileLineTableWrite(path, t)
+	local text = ""
+	for _, line in pairs(t) do
+		text = text..line.."\n"
+	end
+	fileTextWrite(path, text)
+end
+
+function fileTableGet(path)
+	if fs.exists(path) then
+		local file = io.open(path, "r")
+		local lines = {}
+		local i = 1
+		local line = file:read("*l")
+		while line ~= nil do
+			lines[i] = line
+			line = file:read("*l")
+			i = i + 1
+		end
+		file:close()
+		return lines
+	end
+	return {}
+end
+
+function fileTextWrite(path, text)
+	local file = assert(io.open(path, "w"))
+	file:write(text)
+	file:close()
+end
+
+function fileLineReplace(path, line, text)
+	local lines = fileTableGet(path)
+	lines[line] = text
+	fileLineTableWrite(path, lines)
+end
+
+function fileLineGet(path, line)
+	if fs.exists(path) then
+		local lines = fileTableGet(path)
+		return lines[line]
+	end
+	return ""
+end

@@ -1,0 +1,36 @@
+if not kapi20 then
+	os.loadAPI("/kreos/api/kapi20")
+end
+if not load then
+	os.loadAPI("/kreos/api/load")
+end
+if not config then
+	os.loadAPI("/kreos/api/config")
+end
+if not esl then
+	os.loadAPI("/kreos/api/esl")
+end
+if not orbit then
+	os.loadAPI("/kreos/api/orbit")
+end
+
+local w, h = term.getSize()
+
+orbit.createOrbitScreen("OrbitStore")
+orbit.addOrbit("OrbitScreen", "OrbitStore", "Orbit Screen", 2, 2, true, colors.lightGray, function(orbit)
+	programExit = true
+end)
+orbit.addOrbit("UpdateCenter", "OrbitStore", "UpdateCenter", 2, 8, true, colors.lightGray, function(orbit)
+	term.setTextColor(colors.white)
+	print("Hi")
+end)
+
+local programExit = false
+
+while programExit == true do
+	local eventType, button, x, y, i1, i2, i3 = orbit.PullEvent("OrbitStore")
+	
+	sleep(0.1)
+end
+
+orbit.disableScreen("OrbitStore")

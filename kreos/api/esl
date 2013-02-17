@@ -1,0 +1,802 @@
+--[[
+Author: TheOriginalBIT
+Version: 2.3.1
+Created: 04 Jan 2013
+Last Update: 8 Feb 2013
+
+License:
+
+COPYRIGHT NOTICE
+Copyright © 2013 Joshua Asbury a.k.a TheOriginalBIT [theoriginalbit@gmail.com]
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+copies of the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+-Visible credit is given to the original author.
+-The software is distributed in a non-profit way.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+]]--
+
+
+--[[
+
+Java methods from http://docs.oracle.com/javase/6/docs/api/java/lang/String.html
+
+]]--
+
+function charAt( str, index )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( index ) ~= "number" then error( "Bad argument: Number expected, got "..type( index ), 2 ) end
+	if index < 1 or index > #str then error( "Bad argument: Index out of bounds: "..index, 2 ) end
+	return str:sub( index, index )
+end
+
+function compareTo( oneString, anotherString )
+	if type( oneString ) ~= "string" then error( "Bad argument: String expected, got "..type( oneString ), 2 ) end
+	if type( anotherString ) ~= "string" then error( "Bad argument: String expected, got "..type( anotherString ), 2 ) end
+	return oneString == anotherString and 0 or oneString:len() - anotherString:len()
+end
+
+function compareToIgnoreCase( oneString, anotherString )
+	if type( oneString ) ~= "string" then error( "Bad argument: String expected, got "..type( oneString ), 2 ) end
+	if type( anotherString ) ~= "string" then error( "Bad argument: String expected, got "..type( anotherString ), 2 ) end
+	return oneString:lower() == anotherString:lower() and 0 or oneString:len() - anotherString:len()
+end
+
+function concat( oneString, anotherString )
+	if type( oneString ) ~= "string" then error( "Bad argument: String expected, got "..type( oneString ), 2 ) end
+	if type( anotherString ) ~= "string" then error( "Bad argument: String expected, got "..type( anotherString ), 2 ) end
+	return oneString..anotherString
+end
+
+function contains( str, seq )
+	if type( str ) == nil then error( "Bad argument: Value expected, got nil", 2 ) end
+	str = tostring(str)
+	local sStart, sEnd, sStr = str:find( seq, 1 )
+	return sStart ~= nil
+end
+
+function contentEquals( str, tData )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( tData ) ~= "table" then error( "Bad argument: Table expected, got "..type( tData ), 2 ) end
+	return str == table.concat( tData )
+end
+
+function copyValueOf( tData )
+	if type( tData ) ~= "table" then error( "Bad argument: Table expected, got "..type( tData ), 2 ) end
+	return table.concat( tData )
+end
+
+
+function copySubsetOf( tData, offset, count )
+	if type( tData ) ~= "table" then error( "Bad argument: Table expected, got "..type( tData ), 2 ) end
+	if type( offset ) ~= "number" then error( "Bad argument: Number expected, got "..type( offset ), 2 ) end
+	if type( count ) ~= "number" then error( "Bad argument: Number expected, got "..type( count ), 2 ) end
+	if offset + count - 1 > #tData then error( "Bad argument: Index out of bounds: "..( offset + count - 1), 2 ) end
+	return table.concat( tData, "", offset, offset + count - 1 )
+end
+
+function endsWith( str, suffix )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	return str:sub( str:len() - suffix:len() + 1) == tostring( suffix )
+end
+
+function equals( str, value )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	return str == tostring( value )
+end
+
+function equalsIgnoreCase( oneStr, anotherStr )
+	if type( oneStr ) ~= "string" then error( "Bad argument: String expected, got "..type( oneStr ), 2 ) end
+	if type( anotherStr ) ~= "string" then error( "Bad argument: String expected, got "..type( anotherStr ), 2 ) end
+	
+	return oneStr:lower() == anotherStr:lower()
+end
+
+function getBytes( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local bytes = {}
+	for i = 1, str:len() do
+		bytes[i] = str:byte( i )
+	end
+	return bytes
+end
+
+function getChars( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local chars = {}
+	for i = 1, str:len() do
+		chars[i] = str:sub( i, i )
+	end
+	return chars
+end
+
+--[[
+http://docs.oracle.com/javase/6/docs/api/java/lang/String.html#hashCode()
+
+Returns a hash code for this string. The hash code for a String object is computed as
+
+	s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1]
+ 
+using int arithmetic, where s[i] is the ith character of the string, n is the length of the string, and ^ indicates exponentiation. (The hash value of the empty string is zero.)
+]]--
+
+function hashCode( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local int = 0
+	for i = 1, #str do
+		int = int + str:byte( i ) * ( 31 ^ ( #str - i ) )
+	end
+	return int
+end
+
+function indexOf( str, ch )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	ch = tostring( ch )
+	if #ch > 1 then error( "Bad argument: Char expected, got string, consider using indexOfSubstring if intentional", 2 ) end
+	for i = 1, #str do
+		if str:sub( i, i ) == ch then
+			return i
+		end
+	end
+	return nil
+end
+
+function indexOfAfter( str, ch, index )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( index ) ~= "number" then error( "Bad argument: Number expected, got "..type( index ), 2 ) end
+	ch = tostring( ch )
+	if #ch > 1 then error( "Bad argument: Char expected, got string, consider using indexOfSubstring if intentional", 2 ) end
+	for i = index + 1, #str do
+		if str:sub( i, i ) == ch then
+			return i
+		end
+	end
+	return nil
+end
+
+function indexOfSubstring( str, sub )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	sub = tostring( sub )
+	local sStart, sEnd, sStr = str:find( sub, 1 )
+	return sStart
+end
+
+function indexOfSubstringFrom( str, sub, index )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( index ) ~= "number" then error( "Bad argument: Number expected, got "..type( index ), 2 ) end
+	sub = tostring( sub )
+	local sStart, sEnd, sStr = str:find( sub, index + 1 )
+	return sStart
+end
+
+function isEmpty( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	return #str == 0
+end
+
+function lastIndexOf( str, ch )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	ch = tostring( ch )
+	if #ch > 1 then error( "Bad argument: Char expected, got string", 2 ) end
+	for i = #str, 1, -1 do
+		if str:sub( i, i) == ch then
+			return i
+		end
+	end
+	return nil
+end
+
+function lastIndexOfFrom( str, ch, index )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	ch = tostring( ch )
+	if #ch > 1 then error( "Bad argument: Char expected, got string", 2 ) end
+	if type( index ) ~= "number" then error( "Bad argument: Number expected, got "..type( index ), 2 ) end
+	for i = index - 1, 1, -1 do
+		if str:sub( i, i) == ch then
+			return i
+		end
+	end
+	return nil
+end
+
+function lastIndexOfSubstring( str, sub )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	sub = tostring( sub )
+	for i = #str - #sub, 1, -1 do
+		local s = str:sub( i, i + #sub - 1 )
+		if s == sub then
+			return i
+		end
+	end
+	return nil
+end
+
+function lastIndexOfSubstringFrom( str, sub, index )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	sub = tostring( sub )
+	if type( index ) ~= "number" then error( "Bad argument: Number expected, got "..type( index ), 2 ) end
+	for i = #str - (#str - index) - #sub - 1, 1, -1 do
+		local s = str:sub( i, i + #sub - 1 )
+		if s == sub then
+			return i
+		end
+	end
+	return nil
+end
+
+function regionMatches( str, sOffset, other, oOffset, len)
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( other ) ~= "string" then error( "Bad argument: String expected, got "..type( other ), 2 ) end
+	if type( sOffset ) ~= "number" then error( "Bad argument: Number expected, got "..type( sOffset ), 2 ) end
+	if type( oOffset ) ~= "number" then error( "Bad argument: Number expected, got "..type( oOffset ), 2 ) end
+	if type( len ) ~= "number" then error( "Bad argument: Number expected, got "..type( len ), 2 ) end
+	if sOffset > #str then error( "Bad argument: Offset cannot be larger than string length", 2 ) end
+	if oOffset > #other then error( "Bad argument: Offset cannot be larger than string length", 2 ) end
+	if len > #str or len > #other then error( "Bad argument: Length cannot be longer than the shortest string", 2 ) end
+	return ( str:sub( sOffset, sOffset ) == other:sub( oOffset, oOffset ) )
+end
+	
+function replace( str, old, new )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	old = tostring( old )
+	new = tostring( new )
+	local nStr, count = str:gsub( old, new )
+	return nStr
+end
+
+function replaceFirst( str, old, new )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	old = tostring( old )
+	new = tostring( new )
+	local nStr, count = str:gsub( old, new, 1 )
+	return nStr
+end
+
+function split( str, regex )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( regex ) ~= "string" then error( "Bad argument: String expected, got "..type( regex ), 2 ) end
+	local t = { }
+	local fpat = "(.-)"..regex
+	local last_end = 1
+	local s, e, cap = str:find(fpat, 1)
+	while s do
+		if s ~= 1 or cap ~= "" then
+			table.insert(t,cap)
+		end
+		last_end = e+1
+		s, e, cap = str:find(fpat, last_end)
+	end
+	if last_end <= #str then
+		cap = str:sub(last_end)
+		table.insert(t, cap)
+	end
+	return t
+end
+
+function splitLimit( str, regex, lim )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( regex ) ~= "string" then error( "Bad argument: String expected, got "..type( regex ), 2 ) end
+	if type( lim ) ~= "number" then error( "Bad argument: Number expected, got "..type( lim ), 2 ) end
+	local t = { }
+	local fpat = "(.-)"..regex
+	local last_end = 1
+	local s, e, cap = str:find(fpat, 1)
+	while s do
+		if #t == lim - 1 then
+			break
+		end
+		if s ~= 1 or cap ~= "" then
+			table.insert(t,cap)
+		end
+		last_end = e+1
+		s, e, cap = str:find(fpat, last_end)
+	end
+	if last_end <= #str then
+		cap = str:sub(last_end)
+		table.insert(t, cap)
+	end
+	return t
+end
+
+function startsWith( str, prefix )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	prefix = tostring( prefix )
+	return str:sub( 1, prefix:len()) == prefix
+end
+
+function subSequence( str, beginIndex, endIndex )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( beginIndex ) ~= "number" then error( "Bad argument: Number expected, got "..type( beginIndex ), 2 ) end
+	if type( endIndex ) ~= "number" then error( "Bad argument: Number expected, got "..type( endIndex ), 2 ) end
+	local t = {}
+	for i = beginIndex, endIndex do
+		table.insert( t, str:sub( i, i ) )
+	end
+	return t
+end
+
+function toCharTable( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	return getChars( str )
+end
+
+function trim( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	return (str:gsub("^%s*(.-)%s*$", "%1"))
+end
+
+function valueOf( tData )
+	if type( tData ) ~= "table" then error( "Bad argument: Table expected, got "..type( tData), 2 ) end
+	return table.concat( tData )
+end
+
+function valueOfWith( tData, offset, count )
+	if type( tData ) ~= "table" then error( "Bad argument: Table expected, got "..type( tData), 2 ) end
+	if offset == 0 then error( "Bad argument: Table index out of bounds: index "..offset, 2) end
+	if offset > #tData then error( "Bad argument: Table index out of bounds: index "..offset.." length "..#tData , 2) end
+	if count == nil then count = #tData - offset + 1 end
+	if offset + count > #tData + 1 then error( "Bad argument: Offset + Count cannot be larger than table length", 2 ) end
+	return table.concat( tData, "", offset, offset + count - 1 )
+end
+
+
+--[[
+
+C# Methods from http://msdn.microsoft.com/en-us/library/system.string.aspx
+
+]]--
+
+function isWhitespace( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if str == "" then return false end
+	return trim( str ) == ""
+end
+
+function padLeft( str, count )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( count ) ~= "number" then error( "Bad argument: Number expected, got "..type( count ), 2 ) end
+	count = math.floor( count )
+	return string.rep( " ", count )..str
+end
+
+function padLeftWith( str, count, char )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( count ) ~= "number" then error( "Bad argument: Number expected, got "..type( count ), 2 ) end
+	if type( char ) ~= "string" then error( "Bad argument: String expected, got "..type( char ), 2 ) end
+	if #char > 1 then error( "Bad argument: Char expected, got string", 2 ) end
+	count = math.floor( count )
+	return string.rep( char, count )..str
+end
+
+function padRight( str, count )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( count ) ~= "number" then error( "Bad argument: Number expected, got "..type( count ), 2 ) end
+	count = math.floor( count )
+	return str..string.rep( " ", count )
+end
+
+function padRightWith( str, count, char )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( count ) ~= "number" then error( "Bad argument: Number expected, got "..type( count ), 2 ) end
+	if type( char ) ~= "string" then error( "Bad argument: String expected, got "..type( char ), 2 ) end
+	if #char > 1 then error( "Bad argument: Char expected, got string", 2 ) end
+	count = math.floor( count )
+	return str..string.rep( char, count )
+end
+
+function trimEnd( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	return (str:gsub("^(.-)%s*$", "%1"))
+end
+
+function trimStart( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	return (str:gsub("^%s*(.-)", "%1"))
+end
+
+--[[
+
+Objective-C Methods from http://developer.apple.com/library/mac/#documentation/Cocoa/Reference/Foundation/Classes/NSString_Class/Reference/NSString.html#//apple_ref/doc/uid/TP40003744
+
+]]--
+
+function stringWithContentsOfFile( path )
+	if type( path ) ~= "string" then error( "Bad argument: String expected, got "..type( path ), 2 ) end
+	if not fs.exists( path ) then error( "Bad argument: File does not exist at path: "..path, 2 ) end
+	if fs.isDir( path ) then error( "Bad argument: Not a file at path: "..path, 2 ) end
+	
+	local file = io.open( path, "r" )
+	local contents = file:read("*a")
+	file:close()
+	
+	return contents
+end
+
+function stringWithContentsOfURL( url )
+	if type( url ) ~= "string" then error( "Bad argument: String expected, got "..type( url ), 2 ) end
+	url = textutils.urlEncode( url )
+	
+	http.request( url )
+	
+	local event = nil
+	while true do
+		event = { os.pullEventRaw() }
+		
+		if (event[1] == "http_success") then
+                    break
+		elseif (event[1] == "http_failure") then
+			return "No response from server."
+		end
+	end
+	
+	return event[3].readAll()
+end
+
+function writeToFile( str, path )
+	if type( path ) ~= "string" then error( "Bad argument: String expected, got "..type( path ), 2 ) end
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	
+	local file = io.open( path, "w" )
+	file:write( str )
+	file:close()
+end
+
+function characterAtIndex( str, index )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( index ) ~= "number" then error( "Bad argument: Number expected, got "..type( index ), 2 ) end
+	if index < 1 or index > #str then error( "Bad argument: Index out of bounds: "..index, 2 ) end
+	return charAt( index, index )
+end
+
+function getCharacters( str, range )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	return getChars( str )
+end
+
+function componentsSeparatedByString( str, sub )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( sub ) ~= "string" then error( "Bad argument: String expected, got "..type( sub ), 2 ) end
+	return split( str, sub )
+end
+
+function substringFromIndex( str, index )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( index ) ~= "number" then error( "Bad argument: Number expected, got "..type( index ), 2 ) end
+	if index < 1 or index > #str then error( "Bad argument: Index out of bounds: "..index, 2 ) end
+	return str:sub( index )
+end
+
+function substringToIndex( str, index )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( index ) ~= "number" then error( "Bad argument: Number expected, got "..type( index ), 2 ) end
+	if index < 1 or index > #str then error( "Bad argument: Index out of bounds: "..index, 2 ) end
+	return str:sub( 1, index - 1 )
+end
+
+function substringWithRange( str, index, len )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( index ) ~= "number" then error( "Bad argument: Number expected, got "..type( index ), 2 ) end
+	if index < 1 or index > #str then error( "Bad argument: Index out of bounds: "..index, 2 ) end
+	if index + len - 1 > #str then error( "Bad argument: Index + Length out of bounds: "..index, 2 ) end
+	return str:sub( index, index + len )
+end
+
+function rangeOfString( str, sub )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	sub = tostring( sub )
+	local sStart, sEnd, sStr = str:find( sub, 1 )
+	return sStart, ( sEnd - sStart )
+end
+
+function rangeOfStringWithinRange( str, sub, index, len )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( index ) ~= "number" then error( "Bad argument: Number expected, got "..type( index ), 2 ) end
+	if index < 1 or index > #str then error( "Bad argument: Index out of bounds: "..index, 2 ) end
+	if index + len - 1 > #str then error( "Bad argument: Index + Length out of bounds: "..index, 2 ) end
+	sub = tostring( sub )
+	local sStart, sEnd, sStr = str:find( sub, index + 1 )
+	return ( sStart > index + len - 1 ) and nil, nil or sStart, ( sEnd - sStart )
+end
+
+function stringByReplacingOccurrencesOfStringWithString( str, old, new )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	old = tostring( old )
+	new = tostring( new )
+	local nStr, count = str:gsub( old, new )
+	return nStr
+end
+
+function capitalizedString( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local nStr, count = str:gsub("(%a)([%w_']*)", function(first, rest) return first:upper()..rest:lower() end )
+	return nStr
+end
+
+function uppercaseString( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	return str:upper()
+end
+
+function lowercaseString( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	return str:lower()
+end
+
+function intValue( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local num = tonumber( str )
+	return math.floor( num )
+end
+
+function boolValue( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if str:lower() == "true" then
+		return true
+	elseif str:lower() == "false" then
+		return false
+	else
+		return nil
+	end
+end
+
+function pathComponents( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local c = componentsSeparatedByString( str, "/" )
+	local ret = {}
+	if startsWith( str, "/" ) then table.insert( ret, "/" ) end
+	for i = 1, #c do
+		table.insert( ret, c[i] )
+	end
+	return ret
+end
+
+function lastPathComponent( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local components = pathComponents( str )
+	return components[ #components ]
+end
+
+function isAbsolutePath( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local r = shell.resolve( str )
+	return str == ( startsWith( r, "/" ) ) and r or "/"..r
+end
+
+function pathExtension( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local file = lastPathComponent( str )
+	if not contains( file, "%." ) then return "" end
+	local ext = componentsSeparatedByString( file, "%." )
+	return ext[ #ext ]
+end
+
+function stringByAppendingPathComponent( str, comp )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( comp ) ~= "string" then error( "Bad argument: String expected, got "..type( comp ), 2 ) end
+	nStr = str
+	if nStr ~= "" then
+		if not endsWith( nStr, "/" ) then
+			nStr = nStr.."/"
+		end
+	end
+	return nStr..comp
+end
+
+function stringByAppendingPathExtension( str, ext )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( ext ) ~= "string" then error( "Bad argument: String expected, got "..type( ext ), 2 ) end
+	if endsWith( str, "/" ) then
+		str = str:sub( 1, #str - 1 )
+	end
+	return str..( contains( ext, "%." ) and "" or ".")..ext
+end
+
+function stringByDeletingLastPathComponent( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if str == "/" then
+		return str
+	end
+	if contains( str, "/" ) then
+		local path = componentsSeparatedByString( str, "/" )
+		return "/"..table.concat( path, "/", 1, #path - 1 )
+	else
+		return ""
+	end
+end
+
+function stringByDeletingPathExtension( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if str == "/" then
+		return str
+	end
+	if endsWith( str, "/" ) then
+		str = str:sub( 1, #str - 1)
+	end
+	if contains( str, "%." ) then
+		local s = replace( str, "."..pathExtension( str ), "" )
+		if s == "" then
+			return str
+		else
+			return s
+		end
+	else
+		return str
+	end
+end
+
+function stringByAddingPercentEscapes( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	str = string.gsub (str, "\n", "\r\n")
+	str = string.gsub (str, "([^%w ])", function (c) return string.format ("%%%02X", string.byte(c)) end )
+	str = string.gsub (str, " ", "+")
+	return str
+end
+
+function stringByReplacingPercentEscapes( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	str = string.gsub (str, "+", " ")
+	str = string.gsub (str, "%%(%x%x)", function(h) return string.char(tonumber(h,16)) end)
+	str = string.gsub (str, "\r\n", "\n")
+	return str
+end
+
+--[[
+
+Following have been added for some ease of use but are not in the Java String class
+
+]]--
+
+
+function containsIgnoreCase( str, seq )
+	if type( str ) == nli then error( "Bad argument: Value expected, got nil", 2 ) end
+	str = tostring(str):lower()
+	return contains( str, seq:lower() )
+end
+
+function startsWithIgnoreCase( str, prefix )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	prefix = tostring( prefix )
+	
+	return startsWith( str:lower(), prefix:lower() )
+end
+
+function endsWithIgnoreCase( str, suffix )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	suffix = tostring( suffix )
+	
+	return endsWith( str:lower(), suffix:lower() )
+end
+
+function regionMatchesIgnoreCase( str, sOffset, other, oOffset, len)
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( other ) ~= "string" then error( "Bad argument: String expected, got "..type( other ), 2 ) end
+	if type( sOffset ) == nil then sOffset = 1 end
+	if type( sOffset ) ~= "number" then error( "Bad argument: Number expected, got "..type( sOffset ), 2 ) end
+	if type( oOffset ) == nil then oOffset = 1 end
+	if type( oOffset ) ~= "number" then error( "Bad argument: Number expected, got "..type( oOffset ), 2 ) end
+	if type( len ) ~= "number" then error( "Bad argument: Number expected, got "..type( len ), 2 ) end
+	
+	return regionMatches( str:lower(), sOffset, other:lower(), oOffset, len )
+end
+
+function sentenceCase( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local nStr, count = str:gsub("%a", string.upper, 1)
+	return nStr
+end
+
+function titleCase( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local nStr, count = str:gsub("(%a)([%w_']*)", function(first, rest) return first:upper()..rest:lower() end )
+	return nStr
+end
+
+function splitLineToTable( str, width )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( width ) ~= "number" then error( "Bad argument: Number expected, got "..type( width ), 2 ) end
+	if width < 1 then error( "Bad argument: Width must be positive", 2 ) end
+	local currLine = ""
+	local words = split( str, " " )
+	local t = {}
+	for i = 1, #words do
+		if #currLine + #words[i] + 1 > width then
+			table.insert( t, currLine )
+			currLine = words[i].." "
+		else
+			currLine = currLine..words[i].." "
+		end
+		
+		if i == #words then table.insert( t, currLine ) end
+	end
+	
+	return t
+end
+
+function splitLine( str, width )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( width ) ~= "number" then error( "Bad argument: Number expected, got "..type( width ), 2 ) end
+	if width < 1 then error( "Bad argument: Width must be positive", 2 ) end
+	return table.concat( splitLineToTable( str, width ), "\n" )
+end
+
+function count( str, regex )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( regex ) ~= "string" then error( "Bad argument: String expected, got "..type( regex ), 2 ) end
+	local count = 0
+	local fpat = "(.-)"..regex
+	local last_end = 1
+	local s, e, cap = str:find(fpat, last_end)
+	while s do
+		count = count + 1
+		last_end = e+1
+		s, e, cap = str:find(fpat, last_end)
+	end
+	return count
+end
+
+function countIgnoreCase( str, regex )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	if type( regex ) ~= "string" then error( "Bad argument: String expected, got "..type( regex ), 2 ) end
+	str = str:lower()
+	local count = 0
+	local fpat = "(.-)"..regex:lower()
+	local last_end = 1
+	local s, e, cap = str:find(fpat, last_end)
+	while s do
+		count = count + 1
+		last_end = e+1
+		s, e, cap = str:find(fpat, last_end)
+	end
+	return count
+end
+
+function isLower( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local found = str:find( "%L" )
+	return found == nil
+end
+
+function isUpper( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local found = str:find( "%U" )
+	return found == nil
+end
+
+function isAlpha( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local found = str:find( "%A" )
+	return found == nil
+end
+
+function isAlphaNumeric( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local found = str:find( "%W" )
+	return found == nil
+end
+
+function isNumeric( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local found = str:find( "%D" )
+	return found == nil
+end
+
+function isPunctuation( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local found = str:find( "%P" )
+	return found == nil
+end
+
+function isHexadecimal( str )
+	if type( str ) ~= "string" then error( "Bad argument: String expected, got "..type( str ), 2 ) end
+	local found = str:find( "%X" )
+	return found == nil
+end

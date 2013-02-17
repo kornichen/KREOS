@@ -1,0 +1,504 @@
+if not esl then
+	os.loadAPI("/kreos/api/esl")
+end
+
+windowList = {}
+buttonList = {}
+labelList = {}
+inputBoxList = {}
+checkBoxList = {}
+
+-- ====================
+-- Window API
+-- ====================
+
+function createWindow(internalName, windowTitle, x, y, endx, endy, maximizable, minimizable, isMaximized, isMinimized, isVisible)
+	if isMinimized == false then
+		local check = true
+		if not(windowList == {}) then
+			for i=1,#windowList,1 do
+				if(internalName[1]==windowList[i][1]) then check = false end
+			end
+		end
+		
+		if check then
+			windowList[#windowList+1] = {internalName, windowTitle, x, y, endx, endy, maximizable, minimizable, isMaximized, isMinimized, isVisible}
+		end
+		
+		local tempx = x
+		local tempy = y
+		local tempw = endx - x
+		local temph = endy - y
+		while tempy <= endy do
+			while tempx <= endx do
+				term.setCursorPos(tempx, tempy)
+				if tempy == y then
+					term.setBackgroundColor(colors.gray)
+				elseif tempy == endy then
+					term.setBackgroundColor(colors.gray)
+				else
+					term.setBackgroundColor(colors.white)
+				end
+				write(" ")
+				tempx = tempx + 1
+			end
+			tempx = x
+			tempy = tempy + 1
+		end
+		term.setTextColor(colors.cyan)
+		term.setCursorPos(math.ceil(tempw/2)-math.ceil(string.len(windowTitle)/2), y)
+		write(windowTitle)
+		term.setBackgroundColor(colors.white)
+		term.setTextColor(colors.cyan)
+		term.setCursorPos(x, y)
+		term.setBackgroundColor(colors.red)
+		write("X")
+		term.setBackgroundColor(colors.white)
+		if maximizable == true then
+			term.setCursorPos(endx, y)
+			term.setBackgroundColor(colors.blue)
+			write("O")
+			term.setBackgroundColor(colors.white)
+		end
+		if minimizable == true then
+			term.setCursorPos(endx-1, y)
+			term.setBackgroundColor(colors.green)
+			write("_")
+			term.setBackgroundColor(colors.white)
+		end
+	end
+end
+
+function windowGetSize(internalName)
+	for i=1,#windowList,1 do
+		if(internalName == windowList[i][1]) then
+			local tempw = windowList[i][5] - windowList[i][3]
+			local temph = windowList[i][6] - windowList[i][4]
+			return tempw, temph
+		end
+	end
+end
+
+function windowSetSize(internalName, x, y, endx, endy)
+	for i=1,#windowList,1 do
+		if(internalName == windowList[i][1]) then
+			windowList[i][3] = x
+			windowList[i][4] = y
+			windowList[i][5] = endx
+			windowList[i][6] = endy
+		end
+	end
+end
+
+function windowMinimize(internalName)
+	for i=1,#windowList,1 do
+		if(internalName == windowList[i][1]) then
+			if windowList[i][8] == true then
+				if windowList[i][10] == true then
+					windowList[i][10] = false
+				elseif windowList[i][10] == false then
+					windowList[i][10] = true
+				end
+			end
+		end
+	end
+end
+
+function windowMaximize(internalName)
+	for i=1,#windowList,1 do
+		if(internalName == windowList[i][1]) then
+			if windowList[i][7] == true then
+				if windowList[i][9] == true then
+					windowList[i][9] = false
+				elseif windowList[i][9] == false then
+					windowList[i][9] = true
+				end
+			end
+		end
+	end
+end
+
+function windowVisible(internalName)
+	for i=1,#windowList,1 do
+		if(internalName == windowList[i][1]) then
+			if windowList[i][11] == true then
+				windowList[i][11] = false
+			elseif windowList[i][11] == false then
+				windowList[i][11] = true
+			end
+		end
+	end
+end
+
+-- ====================
+-- Button API
+-- ====================
+
+function addButton(internalName, text, x, y, isVisible, onClick)
+	local check = true
+	if not(buttonList == {}) then
+		for i=1,#buttonList,1 do
+			if(internalName[1]==buttonList[i][1]) then check = false end
+		end
+	end
+	
+	if check then
+		buttonList[#buttonList+1] = {internalName, text, x, y, isVisible, onClick}
+		btnRefresh()
+	end
+end
+
+function toggleButton(internalName)
+	for id,button in ipairs(buttonList) do
+		if(internalName == buttonList[id][1]) then
+			if(buttonList[id][5] == true) then
+				buttonList[id][5] = false
+			else
+				buttonList[id][5] = true
+			end
+		end
+	end
+end
+
+function enableButton(internalName)
+	for id, button in ipairs(buttonList) do
+		if(internalName == buttonList[id][1]) then
+			buttonList[id][5] = true
+			return true
+		end
+	end
+	return false
+end
+
+function disableButton(internalName)
+	for id, button in ipairs(buttonList) do
+		if(internalName == buttonList[id][1]) then
+			buttonList[id][5] = false
+			return true
+		end
+	end
+	return false
+end
+
+function removeButton(internalName)
+	for i=1,#buttonList,1 do
+		if(internalName == buttonList[i][1]) then
+			table.remove(buttonList, i)
+			btnRefresh()
+		end
+	end
+end
+
+function changeButtonText(internalName, newText)
+	for i=1,#buttonList,1 do
+		if(internalName == buttonList[i][1]) then
+			buttonList[i][2] = newText
+			btnRefresh()
+		end
+	end
+end
+
+function changeButtonOnClick(internalName, newOnClick)
+	for i=1,#buttonList,1 do
+		if(internalName == buttonList[i][1]) then
+			buttonList[i][6] = newOnClick
+			btnRefresh()
+		end
+	end
+end
+
+function btnRefresh()
+	for i=1,#buttonList,1 do
+		term.setTextColor(colors.gray)
+		term.setBackgroundColor(colors.cyan)
+		startX = buttonList[i][3]
+		startY = buttonList[i][4]
+		term.setCursorPos(startX,startY)
+		write(buttonList[i][2])
+	end
+end
+
+-- ====================
+-- Label API
+-- ====================
+
+function addLabel(internalName, text, x, y, isVisible)
+	local check = true
+	if not(labelList == {}) then
+		for i=1,#labelList,1 do
+			if(internalName[1]==labelList[i][1]) then check = false end
+		end
+	end
+	
+	if check then
+		labelList[#labelList+1] = {internalName, text, x, y, isVisible}
+		labelRefresh()
+	end
+end
+
+function toggleLabel(internalName)
+	for id,button in ipairs(labelList) do
+		if(internalName == labelList[i][1]) then
+			if(labelList[i][5] == true) then
+				labelList[i][5] = false
+			else
+				labelList[i][5] = true
+			end
+		end
+	end
+end
+
+function enableLabel(internalName)
+	for id, button in ipairs(labelList) do
+		if(internalName == labelList[i][1]) then
+			labelList[i][5] = true
+			return true
+		end
+	end
+	return false
+end
+
+function disableLabel(internalName)
+	for id, button in ipairs(labelList) do
+		if(internalName == labelList[i][1]) then
+			labelList[i][5] = false
+			return true
+		end
+	end
+	return false
+end
+
+function removeLabel(internalName)
+	for id, button in ipairs(labelList) do
+		if(internalName == labelList[id][1]) then
+			table.remove(labelList, id)
+			labelRefresh()
+		end
+	end
+end
+
+function changeLabelText(internalName, newText)
+	for i=1,#labelList,1 do
+		if(internalName == labelList[i][1]) then
+			labelList[i][2] = newText
+			labelRefresh()
+		end
+	end
+end
+
+function labelRefresh()
+	for i=1,#labelList,1 do
+		term.setTextColor(colors.cyan)
+		term.setBackgroundColor(colors.white)
+		startX = labelList[i][3]
+		startY = labelList[i][4]
+		term.setCursorPos(startX,startY)
+		write(labelList[i][2])
+	end
+end
+
+-- ====================
+-- InputBox API
+-- ====================
+
+function addInputBox(internalName, length, x, y, isVisible, inputBoxType, value)
+	local check = true
+	if not(inputBoxList == {}) then
+		for i=1,#inputBoxList,1 do
+			if(internalName[1]==inputBoxList[i][1]) then check = false end
+		end
+	end
+	
+	if check then
+		inputBoxList[#inputBoxList+1] = {internalName, length, x, y, isVisible, inputBoxType}
+		inputBoxRefresh()
+	end
+end
+
+function inputBoxGetValue(internalName)
+	for i=1,#inputBoxList,1 do
+		if(internalName == inputBoxList[i][1]) then
+			local value = inputBoxList[i][7]
+			return value
+		end
+	end
+end
+
+function toggleInputBox(internalName)
+	for id,button in ipairs(inputBoxList) do
+		if(internalName == inputBoxList[id][1]) then
+			if(inputBoxList[id][5] == true) then
+				inputBoxList[id][5] = false
+			else
+				inputBoxList[id][5] = true
+			end
+		end
+	end
+end
+
+function enableInputBox(internalName)
+	for id, button in ipairs(inputBoxList) do
+		if(internalName == inputBoxList[i][1]) then
+			inputBoxList[i][5] = true
+			return true
+		end
+	end
+	return false
+end
+
+function disableInputBox(internalName)
+	for id, button in ipairs(inputBoxList) do
+		if(internalName == inputBoxList[i][1]) then
+			inputBoxList[i][5] = false
+			return true
+		end
+	end
+	return false
+end
+
+function removeInputBox(internalName)
+	for id, button in ipairs(inputBoxList) do
+		if(internalName == inputBoxList[id][1]) then
+			table.remove(inputBoxList, id)
+			inputBoxRefresh()
+		end
+	end
+end
+
+function changeInputBoxText(internalName, newText)
+	for i=1,#inputBoxList,1 do
+		if(internalName == inputBoxList[i][1]) then
+			inputBoxList[i][2] = newText
+			inputBoxRefresh()
+		end
+	end
+end
+
+function changeInputBoxType(internalName, newType)
+	for i=1,#inputBoxList,1 do
+		if(internalName == inputBoxList[i][1]) then
+			inputBoxList[i][6] = newType
+			btnRefresh()
+		end
+	end
+end
+
+function inputBoxRefresh()
+	for i=1,#inputBoxList,1 do
+		term.setTextColor(colors.cyan)
+		term.setBackgroundColor(colors.gray)
+		startX = inputBoxList[i][3]
+		startY = inputBoxList[i][4]
+		term.setCursorPos(startX,startY)
+		for i=1, inputBoxList[i][2] do
+			write(" ")
+		end
+	end
+end
+
+-- ====================
+-- Event API
+-- ====================
+
+function pullEvent()
+	local eventType, button, x, y, i1, i2, i3 = os.pullEvent()
+	if not (eventType=="mouse_click" or eventType=="monitor_touch") then
+		return eventType, button, x, y, i1, i2, i3
+	end
+	for id, button in ipairs(buttonList) do
+		if button[5] == true and x >= button[3] and x < button[3]+string.len(button[2]) and y == button[4] then
+			button[6](button[1])
+			return pullEvent()
+		end
+	end
+	for id, inputBox in ipairs(inputBoxList) do
+		if inputBox[5] == true and x >= inputBox[3] and x < inputBox[3]+inputBox[2] and y == inputBox[4] then
+			-- inputBox[6](inputBox[1])
+			term.setTextColor(colors.cyan)
+			term.setBackgroundColor(colors.lightGray)
+			term.setCursorPos(inputBox[3], inputBox[4])
+			for i=1, inputBox[2] do
+				write(" ")
+			end
+			if inputBox[6] == "text" then
+				term.setCursorPos(inputBox[3], inputBox[4])
+				term.setCursorBlink(true)
+				inputBox[7] = read()
+				term.setTextColor(colors.cyan)
+				term.setBackgroundColor(colors.gray)
+				term.setCursorPos(inputBox[3], inputBox[4])
+				for i=1, inputBox[2] do
+					write(" ")
+				end
+				term.setCursorPos(inputBox[3], inputBox[4])
+				write(inputBox[7])
+			elseif inputBox[6] == "password" then
+				term.setCursorPos(inputBox[3], inputBox[4])
+				term.setCursorBlink(true)
+				local tempPassword = read("*")
+				inputBox[7] = esl.hashCode(tempPassword)
+				term.setTextColor(colors.cyan)
+				term.setBackgroundColor(colors.gray)
+				term.setCursorPos(inputBox[3], inputBox[4])
+				for i=1, inputBox[2] do
+					write(" ")
+				end
+				term.setCursorPos(inputBox[3], inputBox[4])
+				for i=1, string.len(tempPassword) do
+					write("*")
+				end
+			end
+			return pullEvent()
+		end
+	end
+	return eventType, button, x, y, i1, i2, i3
+end
+
+-- ====================
+-- File API
+-- ====================
+
+function fileLineTableWrite(path, t)
+	local text = ""
+	for _, line in pairs(t) do
+		text = text..line.."\n"
+	end
+	fileTextWrite(path, text)
+end
+
+function fileTableGet(path)
+	if fs.exists(path) then
+		local file = io.open(path, "r")
+		local lines = {}
+		local i = 1
+		local line = file:read("*l")
+		while line ~= nil do
+			lines[i] = line
+			line = file:read("*l")
+			i = i + 1
+		end
+		file:close()
+		return lines
+	end
+	return {}
+end
+
+function fileTextWrite(path, text)
+	local file = assert(io.open(path, "w"))
+	file:write(text)
+	file:close()
+end
+
+function fileLineReplace(path, line, text)
+	local lines = fileTableGet(path)
+	lines[line] = text
+	fileLineTableWrite(path, lines)
+end
+
+function fileLineGet(path, line)
+	if fs.exists(path) then
+		local lines = fileTableGet(path)
+		return lines[line]
+	end
+	return ""
+end

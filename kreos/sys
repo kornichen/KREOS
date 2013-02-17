@@ -1,0 +1,86 @@
+if not kapi20 then
+	os.loadAPI("/kreos/api/kapi20")
+end
+if not load then
+	os.loadAPI("/kreos/api/load")
+end
+if not config then
+	os.loadAPI("/kreos/api/config")
+end
+if not esl then
+	os.loadAPI("/kreos/api/esl")
+end
+if not orbit then
+	os.loadAPI("/kreos/api/orbit")
+end
+
+local w, h = term.getSize()
+
+orbit.createOrbitScreen("OrbitScreen")
+orbit.addOrbit("OrbitStore", "OrbitScreen", "Orbit Store", 2, 2, true, colors.lightGray, function(orbitFunction)
+	orbit.disableScreen("OrbitScreen")
+	shell.run("/kreos/programs/orbitstore")
+	--orbit.enableScreen("OrbitScreen")
+end)
+orbit.addOrbit("SystemPanel", "OrbitScreen", "SystemPanel", 2, 8, true, colors.lightGray, function(orbitFunction)
+	term.setTextColor(colors.white)
+	print("Hi")
+end)
+orbit.addOrbit("Shutdown", "OrbitScreen", "Shut  Down", 2, 14, true, colors.lightGray, function(orbitFunction)
+	os.shutdown()
+end)
+orbit.addOrbit("Left", "OrbitScreen", "<-----<-----<-----", 14, 14, true, colors.lightGray, function(orbitFunction)
+	term.setTextColor(colors.white)
+	print("Hi")
+end)
+orbit.addOrbit("Right", "OrbitScreen", "----->----->----->", 41, 14, true, colors.lightGray, function(orbitFunction)
+	term.setTextColor(colors.white)
+	print("Hi")
+end)
+
+orbit.addOrbit("Test", "OrbitScreen", "Test", 14, 2, true, colors.cyan, function(orbitFunction)
+	term.setTextColor(colors.white)
+	print("Hi")
+end)
+orbit.addOrbit("Test", "OrbitScreen", "Test", 23, 2, true, colors.orange, function(orbitFunction)
+	term.setTextColor(colors.white)
+	print("Hi")
+end)
+orbit.addOrbit("Test", "OrbitScreen", "Test", 32, 2, true, colors.blue, function(orbitFunction)
+	term.setTextColor(colors.white)
+	print("Hi")
+end)
+orbit.addOrbit("Test", "OrbitScreen", "Test", 41, 2, true, colors.green, function(orbitFunction)
+	term.setTextColor(colors.white)
+	print("Hi")
+end)
+orbit.addOrbit("Test", "OrbitScreen", "Test", 14, 8, true, colors.lightBlue, function(orbitFunction)
+	term.setTextColor(colors.white)
+	print("Hi")
+end)
+orbit.addOrbit("Test", "OrbitScreen", "Test", 23, 8, true, colors.magenta, function(orbitFunction)
+	term.setTextColor(colors.white)
+	print("Hi")
+end)
+orbit.addOrbit("Test", "OrbitScreen", "Test", 32, 8, true, colors.red, function(orbitFunction)
+	term.setTextColor(colors.white)
+	print("Hi")
+end)
+orbit.addOrbit("Test", "OrbitScreen", "Test", 41, 8, true, colors.brown, function(orbitFunction)
+	term.setTextColor(colors.white)
+	print("Hi")
+end)
+orbit.addOrbit("Test", "OrbitScreen", "Test", 23, 14, true, colors.purple, function(orbitFunction)
+	term.setTextColor(colors.white)
+	print("Hi")
+end)
+orbit.addOrbit("Test", "OrbitScreen", "Test", 32, 14, true, colors.lime, function(orbitFunction)
+	term.setTextColor(colors.white)
+	print("Hi")
+end)
+
+while true do
+	local eventType, button, x, y, i1, i2, i3 = orbit.PullEvent("OrbitScreen")
+	
+	sleep(0.1)
+end
