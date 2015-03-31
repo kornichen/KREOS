@@ -1,0 +1,4 @@
+KreOS 3.0 Skylark - Old traditions newly defined
+
+NYI:
+- Compatibility mode, ability to run non KreOS applications in full screen mode instead of window mode

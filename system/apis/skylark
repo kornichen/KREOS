@@ -1,0 +1,554 @@
+-- ========================================
+-- The KreOS 3.0 Skylark API
+-- Written by kornichen
+-- Lastly modified on 31st March 2015
+-- Licensed under General Public License V3
+-- ========================================
+
+local w, h = term.getSize()
+os.pullEvent = os.pullEventRaw
+
+function init()
+	local pages = Page:getObject()
+	local buttons = Button:getObject()
+	local labels = Label:getObject()
+	local checkboxes = Checkbox:getObject()
+	local scrollbars = Scrollbar:getObject()
+	local images = Image:getObject()
+	local render = Render:getObject()
+	local action = Action:getObject()
+	return pages, buttons, labels, checkboxes, scrollbars, images, render, action
+end
+
+local function imageGetSize(image)
+	local x = 0
+	local y = #image
+	for i = 1, y do
+		if #image[i] > x then
+			x = #image[i]
+		end
+	end
+	return x, y
+end
+
+Page = {
+	getObject = function (self, o)
+		o = o or {
+			pages = {}
+		}
+		setmetatable(o, self)
+		self.__index = self
+		return o
+	end,
+	getList = function (self)
+		return self.pages
+	end,
+	create = function (self, internalName, title, enabled, backgroundColor, largeTitleBar)
+		largeTitleBar = largeTitleBar or false
+		table.insert(self.pages, {internalName, title, enabled, backgroundColor, largeTitleBar})
+	end,
+	enable = function (self, internalName)
+		for i = 1, #self.pages do
+			if self.pages[i][1] == internalName then
+				self.pages[i][3] = true
+			end
+		end
+	end,
+	disable = function (self, internalName)
+		for i = 1, #self.pages do
+			if self.pages[i][1] == internalName then
+				self.pages[i][3] = false
+			end
+		end
+	end,
+	changeTitle = function (self, internalName, title)
+		for i = 1, #self.pages do
+			if self.pages[i][1] == internalName then
+				self.pages[i][2] = title
+			end
+		end
+	end,
+	changeBgColor = function (self, internalName, backgroundColor)
+		for i = 1, #self.pages do
+			if self.pages[i][1] == internalName then
+				self.pages[i][4] = backgroundColor
+			end
+		end
+	end,
+	changeBgColour = function (self, internalName, backgroundColor)
+		for i = 1, #self.pages do
+			if self.pages[i][1] == internalName then
+				self.pages[i][4] = backgroundColor
+			end
+		end
+	end,
+	largeTitleBar = function (self, internalName, largeTitleBar)
+		for i = 1, #self.pages do
+			if self.pages[i][1] == internalName then
+				self.pages[i][5] = largeTitleBar
+			end
+		end
+	end
+}
+
+Button = {
+	getObject = function (self, o)
+		o = o or {
+			buttons = {}
+		}
+		setmetatable(o, self)
+		self.__index = self
+		return o
+	end,
+	getList = function (self)
+		return self.buttons
+	end,
+	create = function (self, internalName, page, enabled, x, y, text, textColor, backgroundColor, onClick)
+		table.insert(self.buttons, {internalName, page, enabled, x, y, text, textColor, backgroundColor, onClick})
+	end,
+	enable = function (self, internalName)
+		for i = 1, #self.buttons do
+			if self.buttons[i][1] == internalName then
+				self.buttons[i][3] = true
+			end
+		end
+	end,
+	disable = function (self, internalName)
+		for i = 1, #self.buttons do
+			if self.buttons[i][1] == internalName then
+				self.buttons[i][3] = false
+			end
+		end
+	end,
+	changePage = function (self, internalName, page)
+		for i = 1, #self.buttons do
+			if self.buttons[i][1] == internalName then
+				self.buttons[i][2] = page
+			end
+		end
+	end,
+	changePosition = function (self, internalName, x, y)
+		for i = 1, #self.buttons do
+			if self.buttons[i][1] == internalName then
+				self.buttons[i][4] = x
+				self.buttons[i][5] = y
+			end
+		end
+	end,
+	changeText = function (self, internalName, text)
+		for i = 1, #self.buttons do
+			if self.buttons[i][1] == internalName then
+				self.buttons[i][6] = text
+			end
+		end
+	end,
+	changeTxtColor = function (self, internalName, textColor)
+		for i = 1, #self.buttons do
+			if self.buttons[i][1] == internalName then
+				self.buttons[i][7] = textColor
+			end
+		end
+	end,
+	changeTxtColour = function (self, internalName, textColor)
+		for i = 1, #self.buttons do
+			if self.buttons[i][1] == internalName then
+				self.buttons[i][7] = textColor
+			end
+		end
+	end,
+	changeBgColor = function (self, internalName, backgroundColor)
+		for i = 1, #self.buttons do
+			if self.buttons[i][1] == internalName then
+				self.buttons[i][8] = backgroundColor
+			end
+		end
+	end,
+	changeBgColour = function (self, internalName, backgroundColor)
+		for i = 1, #self.buttons do
+			if self.buttons[i][1] == internalName then
+				self.buttons[i][8] = backgroundColor
+			end
+		end
+	end,
+	changeOnClick = function (self, internalName, onClick)
+		for i = 1, #self.buttons do
+			if self.buttons[i][1] == internalName then
+				self.buttons[i][9] = onClick
+			end
+		end
+	end
+}
+
+Label = {
+	getObject = function (self)
+		o = {
+			labels = {}
+		}
+		setmetatable(o, self)
+		self.__index = self
+		return o
+	end,
+	getList = function (self)
+		return self.labels
+	end,
+	create = function (self, internalName, page, enabled, x, y, text, textColor, backgroundColor)
+		table.insert(self.labels, {internalName, page, enabled, x, y, text, textColor, backgroundColor})
+	end,
+	enable = function (self, internalName)
+		for i = 1, #self.labels do
+			if self.labels[i][1] == internalName then
+				self.labels[i][3] = true
+			end
+		end
+	end,
+	disable = function (self, internalName)
+		for i = 1, #self.labels do
+			if self.labels[i][1] == internalName then
+				self.labels[i][3] = false
+			end
+		end
+	end,
+	changePage = function (self, internalName, page)
+		for i = 1, #self.labels do
+			if self.labels[i][1] == internalName then
+				self.labels[i][2] = page
+			end
+		end
+	end,
+	changePosition = function (self, internalName, x, y)
+		for i = 1, #self.labels do
+			if self.labels[i][1] == internalName then
+				self.labels[i][4] = x
+				self.labels[i][5] = y
+			end
+		end
+	end,
+	changeText = function (self, internalName, text)
+		for i = 1, #self.labels do
+			if self.labels[i][1] == internalName then
+				self.labels[i][6] = text
+			end
+		end
+	end,
+	changeTxtColor = function (self, internalName, textColor)
+		for i = 1, #self.labels do
+			if self.labels[i][1] == internalName then
+				self.labels[i][7] = textColor
+			end
+		end
+	end,
+	changeTxtColour = function (self, internalName, textColor)
+		for i = 1, #self.labels do
+			if self.labels[i][1] == internalName then
+				self.labels[i][7] = textColor
+			end
+		end
+	end,
+	changeBgColor = function (self, internalName, backgroundColor)
+		for i = 1, #self.labels do
+			if self.labels[i][1] == internalName then
+				self.labels[i][8] = backgroundColor
+			end
+		end
+	end,
+	changeBgColour = function (self, internalName, backgroundColor)
+		for i = 1, #self.labels do
+			if self.labels[i][1] == internalName then
+				self.labels[i][8] = backgroundColor
+			end
+		end
+	end
+}
+
+Checkbox = {
+	getObject = function (self, o)
+		o = o or {
+			checkboxes = {}
+		}
+		setmetatable(o, self)
+		self.__index = self
+		return o
+	end,
+	getList = function (self)
+		return self.checkboxes
+	end,
+	create = function (self, internalName, page, enabled, x, y, activated, textColor, backgroundColor)
+		table.insert(self.checkboxes, {internalName, page, enabled, x, y, activated, textColor, backgroundColor})
+	end,
+	enable = function (self, internalName)
+		for i = 1, #self.checkboxes do
+			if self.checkboxes[i][1] == internalName then
+				self.checkboxes[i][3] = true
+			end
+		end
+	end,
+	disable = function (self, internalName)
+		for i = 1, #self.checkboxes do
+			if self.checkboxes[i][1] == internalName then
+				self.checkboxes[i][3] = false
+			end
+		end
+	end,
+	changePage = function (self, internalName, page)
+		for i = 1, #self.checkboxes do
+			if self.checkboxes[i][1] == internalName then
+				self.checkboxes[i][2] = page
+			end
+		end
+	end,
+	changePosition = function (self, internalName, x, y)
+		for i = 1, #self.checkboxes do
+			if self.checkboxes[i][1] == internalName then
+				self.checkboxes[i][4] = x
+				self.checkboxes[i][5] = y
+			end
+		end
+	end,
+	activate = function (self, internalName)
+		for i = 1, #self.checkboxes do
+			if self.checkboxes[i][1] == internalName then
+				self.checkboxes[i][6] = true
+			end
+		end
+	end,
+	deactivate = function (self, internalName)
+		for i = 1, #self.checkboxes do
+			if self.checkboxes[i][1] == internalName then
+				self.checkboxes[i][6] = false
+			end
+		end
+	end,
+	changeTxtColor = function (self, internalName, textColor)
+		for i = 1, #self.checkboxes do
+			if self.checkboxes[i][1] == internalName then
+				self.checkboxes[i][7] = textColor
+			end
+		end
+	end,
+	changeTxtColour = function (self, internalName, textColor)
+		for i = 1, #self.checkboxes do
+			if self.checkboxes[i][1] == internalName then
+				self.checkboxes[i][7] = textColor
+			end
+		end
+	end,
+	changeBgColor = function (self, internalName, backgroundColor)
+		for i = 1, #self.checkboxes do
+			if self.checkboxes[i][1] == internalName then
+				self.checkboxes[i][8] = backgroundColor
+			end
+		end
+	end,
+	changeBgColour = function (self, internalName, backgroundColor)
+		for i = 1, #self.checkboxes do
+			if self.checkboxes[i][1] == internalName then
+				self.checkboxes[i][8] = backgroundColor
+			end
+		end
+	end
+}
+
+Scrollbar = {
+	getObject = function (self, o)
+		o = o or {
+			checkboxes = {}
+		}
+		setmetatable(o, self)
+		self.__index = self
+		return o
+	end,
+	getList = function (self)
+		return self.checkboxes
+	end
+}
+
+Image = {
+	getObject = function (self)
+		o = {
+			images = {}
+		}
+		setmetatable(o, self)
+		self.__index = self
+		return o
+	end,
+	getList = function (self)
+		return self.images
+	end,
+	create = function (self, internalName, page, enabled, x, y, image, onClick)
+		onClick = onClick or function() end
+		table.insert(self.images, {internalName, page, enabled, x, y, image, onClick})
+	end,
+	enable = function (self, internalName)
+		for i = 1, #self.images do
+			if self.images[i][1] == internalName then
+				self.images[i][3] = true
+			end
+		end
+	end,
+	disable = function (self, internalName)
+		for i = 1, #self.images do
+			if self.images[i][1] == internalName then
+				self.images[i][3] = false
+			end
+		end
+	end,
+	changePosition = function (self, internalName, x, y)
+		for i = 1, #self.images do
+			if self.images[i][1] == internalName then
+				self.images[i][4] = x
+				self.images[i][5] = y
+			end
+		end
+	end,
+	changeImage = function (self, internalName, image)
+		for i = 1, #self.images do
+			if self.images[i][1] == internalName then
+				self.images[i][6] = image
+			end
+		end
+	end,
+	changeOnClick = function (self, internalName, onClick)
+		for i = 1, #self.images do
+			if self.images[i][1] == internalName then
+				self.images[i][7] = onClick
+			end
+		end
+	end
+}
+
+Render = {
+	getObject = function (self)
+		o = {}
+		setmetatable(o, self)
+		self.__index = self
+		return o
+	end,
+	all = function (self, page, button, label, checkbox, images)
+		button = button or false
+		label = label or false
+		checkbox = checkbox or false
+		images = images or false
+
+		term.clear()
+		for i = 1, #page:getList() do
+			if page:getList()[i][3] == true then
+				term.setBackgroundColor(page:getList()[i][4])
+				term.clear()
+				term.setTextColor(colors.cyan)
+				term.setBackgroundColor(colors.gray)
+				if page:getList()[i][5] then
+					for i = 1, 3 do
+						term.setCursorPos(1, i)
+						term.clearLine()
+					end
+					term.setCursorPos((w / 2) - (string.len(page:getList()[i][2]) / 2), 2)
+					term.write(page:getList()[i][2])
+				else
+					term.setCursorPos(2, 1)
+					term.clearLine()
+					term.setCursorPos((w / 2) - (string.len(page:getList()[i][2]) / 2), 1)
+					term.write(page:getList()[i][2])
+				end
+				-- Draw buttons
+				if button ~= false then
+					for j = 1, #button:getList() do
+						if button:getList()[j][2] == page:getList()[i][1] and button:getList()[j][3] then
+							term.setTextColor(button:getList()[j][7])
+							term.setBackgroundColor(button:getList()[j][8])
+							term.setCursorPos(button:getList()[j][4], button:getList()[j][5])
+							term.write(button:getList()[j][6])
+						end
+					end
+				end
+				-- Draw labels
+				if label ~= false then
+					for j = 1, #label:getList() do
+						if label:getList()[j][2] == page:getList()[i][1] and label:getList()[j][3] then
+							term.setTextColor(label:getList()[j][7])
+							term.setBackgroundColor(label:getList()[j][8])
+							term.setCursorPos(label:getList()[j][4], label:getList()[j][5])
+							term.write(label:getList()[j][6])
+						end
+					end
+				end
+				-- Draw checkboxes
+				if checkbox ~= false then
+					for j = 1, #checkbox:getList() do
+						if checkbox:getList()[j][2] == page:getList()[i][1] and checkbox:getList()[j][3] then
+							term.setTextColor(checkbox:getList()[j][7])
+							
+						end
+					end
+				end
+				-- Draw images
+				if images ~= false then
+					for j = 1, #images:getList() do
+						if images:getList()[j][2] == page:getList()[i][1] and images:getList()[j][3] then
+							paintutils.drawImage(images:getList()[j][6], images:getList()[j][4], images:getList()[j][5])
+						end
+					end
+				end
+			end
+		end
+	end
+}
+
+Action = {
+	getObject = function (self)
+		o = {}
+		setmetatable(o, self)
+		self.__index = self
+		return o
+	end,
+	pullEvent = function (self, page, button, checkbox, image)
+		button = button or false
+		checkbox = checkbox or false
+		image = image or false
+
+		local event, arg1, arg2, arg3, arg4, arg5 = os.pullEvent()
+
+		if event == "mouse_click" then
+			-- Check if a button has been clicked
+			if button ~= false then
+				for i = 1, #page:getList() do
+					if page:getList()[i][3] == true then
+						for j = 1, #button:getList() do
+							if page:getList()[i][1] == button:getList()[j][2] and button:getList()[j][3] and arg2 >= button:getList()[j][4] and arg2 < button:getList()[j][4] + string.len(button:getList()[j][6]) and arg3 == button:getList()[j][5] and arg1 == 1 then
+								button:getList()[j][9]()
+							end
+						end
+					end
+				end
+			end
+			-- Check if a checkbox has been clicked
+			if checkbox ~= false then
+				for i = 1, #page:getList() do
+					if page:getList()[i][3] == true then
+						for j = 1, #checkbox:getList() do
+							if page:getList()[i][1] == checkbox:getList()[j][2] and checkbox:getList()[j][3] and arg2 >= checkbox:getList()[j][4] and arg2 < checkbox:getList()[j][4] + 3 and arg3 == checkbox:getList()[j][5] and arg1 == 1 then
+								if checkbox:getList()[j][6] then
+									checkbox:getList()[j][6] = false
+								else
+									checkbox:getList()[j][6] = true
+								end
+							end
+						end
+					end
+				end
+			end
+			-- Check if an image has been clicked
+			if image ~= false then
+				for i = 1, #page:getList() do
+					if page:getList()[i][3] == true then
+						for j = 1, #image:getList() do
+							local imgW, imgH = imageGetSize(image:getList()[j][6])
+							if page:getList()[i][1] == image:getList()[j][2] and image:getList()[j][3] and arg2 >= image:getList()[j][4] and arg2 < image:getList()[j][4] + imgW - 1 and arg3 >= image:getList()[j][5] and arg3 < image:getList()[j][5] + imgH and arg1 == 1 then
+								image:getList()[j][7]()
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+}

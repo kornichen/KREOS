@@ -1,0 +1,21 @@
+os.loadAPI("/system/apis/skylark")
+
+local pages, buttons, labels, images, render, action = skylark.init()
+
+pages:create("pgTest", "Hallo", true, colors.white)
+buttons:create("btnTest", "pgTest", true, 5, 5, "Text", colors.black, colors.lightGray, function()
+	error()
+end)
+buttons:create("btnTest2", "pgTest", true, 10, 6, "Hallo du da", colors.black, colors.lightGray, function()
+	error()
+end)
+labels:create("lblTest", "pgTest", true, 15, 3, "Moin Moin", colors.black, colors.white)
+images:create("imgTest", "pgTest", true, 20, 10, paintutils.loadImage("/icon1"), function()
+	error()
+end)
+
+render:all(pages, buttons, labels, images)
+
+while true do
+	action:pullEvent(pages, buttons, images)
+end

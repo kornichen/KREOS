@@ -1,0 +1,10 @@
+-- ========================================
+-- The KreOS 3.0 Skylark Startup
+-- Written by kornichen
+-- Lastly modified on 31st March 2015
+-- Licensed under General Public License V3
+-- ========================================
+
+os.loadAPI("/system/apis/skylark")
+
+shell.run("/system/drawer")
