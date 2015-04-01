@@ -13,7 +13,7 @@ if args[1] ~= "drawer" then
 	error("This has to be started from KreOS.")
 end
 
-local pages, buttons, labels, checkboxes, scrollbars, images, render, action = skylark.init()
+local pages, buttons, inputboxes, labels, checkboxes, scrollbars, images, render, action = skylark.init()
 local w, h = term.getSize()
 
 local function imageGetSize(image)
@@ -66,6 +66,6 @@ for i = 2, #apps do
 end
 
 while true do
-	render:all(pages, buttons, labels, checkboxes, images)
-	action:pullEvent(pages, buttons, checkboxes, images)
+	render:all(pages, buttons, inputboxes, labels, checkboxes, images)
+	action:pullEvent(pages, buttons, inputboxes, checkboxes, images)
 end

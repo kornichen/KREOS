@@ -1,0 +1,31 @@
+-- ==========================================
+-- The KreOS 3.0 Skylark Add Application
+-- Written by kornichen
+-- Lastly modified on 1st April 2015
+-- Licensed under General Public License V3
+-- ==========================================
+
+os.loadAPI("/system/apis/skylark")
+
+local args = { ... }
+
+if args[1] ~= "config_applications" then
+	error("This has to be started from KreOS.")
+end
+
+local pages, buttons, inputboxes, labels, checkboxes, scrollbars, images, render, action = skylark.init()
+local w, h = term.getSize()
+
+pages:create("config_addApplication", "Add Application", true, colors.white, true)
+
+buttons:create("btnAddApplication", "config_addApplication", true, 2, 2, "Done", colors.cyan, colors.gray, function()
+	pages:disable("config_addApplication")
+	error()
+end)
+
+inputboxes:create("ibTest", "config_addApplication", true, 2, 5, 10, colors.black, colors.lightGray)
+
+while true do
+	render:all(pages, buttons, inputboxes, labels, checkboxes, images)
+	action:pullEvent(pages, buttons, inputboxes, checkboxes, images)
+end

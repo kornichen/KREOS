@@ -7,7 +7,7 @@
 
 os.loadAPI("/system/apis/skylark")
 
-local pages, buttons, labels, checkboxes, scrollbars, images, render, action = skylark.init()
+local pages, buttons, inputboxes, labels, checkboxes, scrollbars, images, render, action = skylark.init()
 local w, h = term.getSize()
 
 local function imageGetSize(image)
@@ -73,9 +73,9 @@ for i = 2, #apps do
 end
 
 while true do
-	render:all(pages, buttons, labels, checkboxes, images)
+	render:all(pages, buttons, inputboxes, labels, checkboxes, images)
 	time = textutils.formatTime(os.time(), false)
 	labels:changeText("lbTime", time)
 	labels:changePosition("lbTime", w - string.len(time), 2)
-	action:pullEvent(pages, buttons, checkboxes, images)
+	action:pullEvent(pages, buttons, inputboxes, checkboxes, images)
 end

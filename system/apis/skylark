@@ -11,13 +11,14 @@ os.pullEvent = os.pullEventRaw
 function init()
 	local pages = Page:getObject()
 	local buttons = Button:getObject()
+	local inputboxes = Inputbox:getObject()
 	local labels = Label:getObject()
 	local checkboxes = Checkbox:getObject()
 	local scrollbars = Scrollbar:getObject()
 	local images = Image:getObject()
 	local render = Render:getObject()
 	local action = Action:getObject()
-	return pages, buttons, labels, checkboxes, scrollbars, images, render, action
+	return pages, buttons, inputboxes, labels, checkboxes, scrollbars, images, render, action
 end
 
 local function imageGetSize(image)
@@ -174,6 +175,94 @@ Button = {
 		for i = 1, #self.buttons do
 			if self.buttons[i][1] == internalName then
 				self.buttons[i][9] = onClick
+			end
+		end
+	end
+}
+
+Inputbox = {
+	getObject = function (self, o)
+		o = o or {
+			inputboxes = {}
+		}
+		setmetatable(o, self)
+		self.__index = self
+		return o
+	end,
+	getList = function (self)
+		return self.inputboxes
+	end,
+	create = function (self, internalName, page, enabled, x, y, length, textColor, backgroundColor)
+		table.insert(self.inputboxes, {internalName, page, enabled, x, y, length, textColor, backgroundColor, ""})
+	end,
+	enable = function (self, internalName)
+		for i = 1, #self.inputboxes do
+			if self.inputboxes[i][1] == internalName then
+				self.inputboxes[i][3] = true
+			end
+		end
+	end,
+	disable = function (self, internalName)
+		for i = 1, #self.inputboxes do
+			if self.inputboxes[i][1] == internalName then
+				self.inputboxes[i][3] = false
+			end
+		end
+	end,
+	changePage = function (self, internalName, page)
+		for i = 1, #self.inputboxes do
+			if self.inputboxes[i][1] == internalName then
+				self.inputboxes[i][2] = page
+			end
+		end
+	end,
+	changePosition = function (self, internalName, x, y)
+		for i = 1, #self.inputboxes do
+			if self.inputboxes[i][1] == internalName then
+				self.inputboxes[i][4] = x
+				self.inputboxes[i][5] = y
+			end
+		end
+	end,
+	changeLength = function (self, internalName, length)
+		for i = 1, #self.inputboxes do
+			if self.inputboxes[i][1] == internalName then
+				self.inputboxes[i][6] = length
+			end
+		end
+	end,
+	changeTxtColor = function (self, internalName, textColor)
+		for i = 1, #self.inputboxes do
+			if self.inputboxes[i][1] == internalName then
+				self.inputboxes[i][7] = textColor
+			end
+		end
+	end,
+	changeTxtColour = function (self, internalName, textColor)
+		for i = 1, #self.inputboxes do
+			if self.inputboxes[i][1] == internalName then
+				self.inputboxes[i][7] = textColor
+			end
+		end
+	end,
+	changeBgColor = function (self, internalName, backgroundColor)
+		for i = 1, #self.inputboxes do
+			if self.inputboxes[i][1] == internalName then
+				self.inputboxes[i][8] = backgroundColor
+			end
+		end
+	end,
+	changeBgColour = function (self, internalName, backgroundColor)
+		for i = 1, #self.inputboxes do
+			if self.inputboxes[i][1] == internalName then
+				self.inputboxes[i][8] = backgroundColor
+			end
+		end
+	end,
+	changeValue = function (self, internalName, value)
+		for i = 1, #self.inputboxes do
+			if self.inputboxes[i][1] == internalName then
+				self.inputboxes[i][9] = value
 			end
 		end
 	end
@@ -423,8 +512,9 @@ Render = {
 		self.__index = self
 		return o
 	end,
-	all = function (self, page, button, label, checkbox, images)
+	all = function (self, page, button, inputbox, label, checkbox, images)
 		button = button or false
+		inputbox = inputbox or false
 		label = label or false
 		checkbox = checkbox or false
 		images = images or false
@@ -460,6 +550,21 @@ Render = {
 						end
 					end
 				end
+				-- Draw inputboxes
+				if inputbox ~= false then
+					for j = 1, #inputbox:getList() do
+						if inputbox:getList()[j][2] == page:getList()[i][1] and inputbox:getList()[j][3] then
+							term.setTextColor(inputbox:getList()[j][7])
+							term.setBackgroundColor(inputbox:getList()[j][8])
+							term.setCursorPos(inputbox:getList()[j][4], inputbox:getList()[j][5])
+							for k = 1, inputbox:getList()[j][6] do
+								write(" ")
+							end
+							term.setCursorPos(inputbox:getList()[j][4], inputbox:getList()[j][5])
+							write(inputbox:getList()[j][9])
+						end
+					end
+				end
 				-- Draw labels
 				if label ~= false then
 					for j = 1, #label:getList() do
@@ -476,7 +581,13 @@ Render = {
 					for j = 1, #checkbox:getList() do
 						if checkbox:getList()[j][2] == page:getList()[i][1] and checkbox:getList()[j][3] then
 							term.setTextColor(checkbox:getList()[j][7])
-							
+							term.setBackgroundColor(checkbox:getList()[j][8])
+							term.setCursorPos(checkbox:getList()[j][4], checkbox:getList()[j][5])
+							if checkbox:getList()[j][6] then
+								term.write("ON ")
+							else
+								term.write("OFF")
+							end
 						end
 					end
 				end
@@ -500,14 +611,15 @@ Action = {
 		self.__index = self
 		return o
 	end,
-	pullEvent = function (self, page, button, checkbox, image)
+	pullEvent = function (self, page, button, inputbox, checkbox, image)
 		button = button or false
+		inputbox = inputbox or false
 		checkbox = checkbox or false
 		image = image or false
 
 		local event, arg1, arg2, arg3, arg4, arg5 = os.pullEvent()
 
-		if event == "mouse_click" then
+		if event == "mouse_click" and not inputboxActive then
 			-- Check if a button has been clicked
 			if button ~= false then
 				for i = 1, #page:getList() do
@@ -515,6 +627,17 @@ Action = {
 						for j = 1, #button:getList() do
 							if page:getList()[i][1] == button:getList()[j][2] and button:getList()[j][3] and arg2 >= button:getList()[j][4] and arg2 < button:getList()[j][4] + string.len(button:getList()[j][6]) and arg3 == button:getList()[j][5] and arg1 == 1 then
 								button:getList()[j][9]()
+							end
+						end
+					end
+				end
+			end
+			-- Check if an inputbox has been clicked
+			if inputbox ~= false then
+				for i = 1, #page:getList() do
+					if page:getList()[i][3] == true then
+						for j = 1, #inputbox:getList() do
+							if page:getList()[i][1] == inputbox:getList()[j][2] and inputbox:getList()[j][3] and arg2 >= inputbox:getList()[j][4] and arg2 < inputbox:getList()[j][4] + inputbox:getList()[j][6] and arg3 == inputbox:getList()[j][5] and arg1 == 1 then
 							end
 						end
 					end
