@@ -16,19 +16,44 @@ end
 local pages, buttons, inputboxes, labels, checkboxes, scrollbars, images, render, action = skylark.init()
 local w, h = term.getSize()
 
+local currentIcon = 1
+local iconList = {}
+
+local function saveChangesToFile()
+	local file = fs.open("/system/config/apps", "r")
+	local data = file.readAll()
+	file.close()
+	fs.delete("/system/config/apps")
+	local apps = textutils.unserialize(data)
+	local newApp = {
+		math.random(10000),
+		1,
+		inputboxes:getValue("ibApplicationName"),
+		iconList[currentIcon][2],
+		inputboxes:getValue("ibApplicationPath")
+	}
+	table.insert(apps, newApp)
+	local newFile = fs.open("/system/config/apps", "w")
+	newFile.write(textutils.serialize(apps))
+	newFile.close()
+end
+
 pages:create("config_addApplication", "Add Application", true, colors.white, true)
 
 buttons:create("btnAddApplication", "config_addApplication", true, 2, 2, "Done", colors.cyan, colors.gray, function()
+	saveChangesToFile()
+	pages:disable("config_addApplication")
+	error()
+end)
+buttons:create("btnCancelApplication", "config_addApplication", true, 8, 2, "Cancel", colors.cyan, colors.gray, function()
 	pages:disable("config_addApplication")
 	error()
 end)
 
-local currentIcon = 1
-local iconList = {}
 local imageFolder = fs.list("/system/images/")
 for i = 1, #imageFolder do
 	if string.sub(imageFolder[i], 1, 4) == "icn_" then
-		table.insert(iconList, paintutils.loadImage("/system/images/" .. imageFolder[i]))
+		table.insert(iconList, { paintutils.loadImage("/system/images/" .. imageFolder[i]), "/system/images/" .. imageFolder[i] })
 	end
 end
 
@@ -36,17 +61,17 @@ labels:create("lbApplicationName", "config_addApplication", true, 2, 5, "Name:",
 inputboxes:create("ibApplicationName", "config_addApplication", true, 14, 5, 20, colors.black, colors.lightGray)
 labels:create("lbApplicationPath", "config_addApplication", true, 2, 9, "Path:", colors.black, colors.white)
 inputboxes:create("ibApplicationPath", "config_addApplication", true, 14, 9, 20, colors.black, colors.lightGray)
-images:create("imgIconSelection", "config_addApplication", true, 40, 5, iconList[1], function() end)
+images:create("imgIconSelection", "config_addApplication", true, 40, 5, iconList[1][1], function() end)
 buttons:create("btnIconSelectionLast", "config_addApplication", true, 40, 12, "<--", colors.black, colors.lightGray, function()
 	if currentIcon > 1 then
 		currentIcon = currentIcon - 1
-		images:changeImage("imgIconSelection", iconList[currentIcon])
+		images:changeImage("imgIconSelection", iconList[currentIcon][1])
 	end
 end)
 buttons:create("btnIconSelectionNext", "config_addApplication", true, 44, 12, "-->", colors.black, colors.lightGray, function()
 	if #iconList > currentIcon then
 		currentIcon = currentIcon + 1
-		images:changeImage("imgIconSelection", iconList[currentIcon])
+		images:changeImage("imgIconSelection", iconList[currentIcon][1])
 	end
 end)
 labels:create("lbFullscreen", "config_addApplication", true, 2, 13, "Fullscreen:", colors.black, colors.white)

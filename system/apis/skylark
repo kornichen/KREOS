@@ -265,6 +265,13 @@ Inputbox = {
 				self.inputboxes[i][9] = value
 			end
 		end
+	end,
+	getValue = function (self, internalName)
+		for i = 1, #self.inputboxes do
+			if self.inputboxes[i][1] == internalName then
+				return self.inputboxes[i][9]
+			end
+		end
 	end
 }
 
