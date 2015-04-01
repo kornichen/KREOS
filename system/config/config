@@ -1,6 +1,6 @@
 {
   {
-    3,
+    4,
   },
   {
     1,
@@ -32,4 +32,12 @@
       true,
     },
   },
+  {
+    4,
+    1,
+    "Applications",
+    "/system/images/icn_applications",
+    "/system/config_applications",
+    {}
+  }
 }

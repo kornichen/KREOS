@@ -1,9 +1,9 @@
--- ========================================
--- The KreOS 3.0 Skylark Color Settings
+-- ==========================================
+-- The KreOS 3.0 Skylark Application Settings
 -- Written by kornichen
 -- Lastly modified on 1st April 2015
 -- Licensed under General Public License V3
--- ========================================
+-- ==========================================
 
 os.loadAPI("/system/apis/skylark")
 

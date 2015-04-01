@@ -1,10 +1,18 @@
 -- ========================================
 -- The KreOS 3.0 Skylark Startup
 -- Written by kornichen
--- Lastly modified on 31st March 2015
+-- Lastly modified on 1st April 2015
 -- Licensed under General Public License V3
 -- ========================================
 
 os.loadAPI("/system/apis/skylark")
+
+-- Checking for updates
+local newestVersion = http.get("http://www.lxnd.me/kreos/version").readLine()
+local file = fs.open("/system/config/version", "r")
+local installedVersion = file.readLine()
+if newestVersion > installedVersion then
+	-- update
+end
 
 shell.run("/system/drawer")
