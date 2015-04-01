@@ -32,7 +32,7 @@ local data = file.readAll()
 file.close()
 local apps = textutils.unserialize(data)
 
-pages:create("settings", "Home", true, colors.white, true)
+pages:create("settings", "Settings", true, colors.white, true)
 
 buttons:create("btnSettingsDrawer", "settings", true, 2, 2, "Drawer", colors.cyan, colors.gray, function()
 	pages:disable("settings")
@@ -55,7 +55,11 @@ for i = 2, #apps do
 	if apps[i][2] == page then
 		local icon = paintutils.loadImage(apps[i][4])
 		images:create("imgApp" .. apps[i][1], "settings", true, x, (h / 2) - (imageGetSize(icon) / 2) + 3, icon, function()
-			error()
+			if apps[i][5] ~= false then
+				pages:disable("settings")
+				shell.run(apps[i][5], "settings")
+				pages:enable("settings")
+			end
 		end)
 	end
 	x = x + 9

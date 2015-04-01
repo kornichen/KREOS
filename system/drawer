@@ -21,17 +21,26 @@ local function imageGetSize(image)
 	return x, y
 end
 
+local function getBgColorFromFile()
+	local file = fs.open("/system/config/config", "r")
+	local data = file.readAll()
+	file.close()
+	local config = textutils.unserialize(data)
+	return config[2][6][1]
+end
+
 local file = fs.open("/system/config/apps", "r")
 local data = file.readAll()
 file.close()
 local apps = textutils.unserialize(data)
 
-pages:create("drawer", "Home", true, colors.white, true)
+pages:create("drawer", "Home", true, getBgColorFromFile(), true)
 
 buttons:create("btnDrawerSettings", "drawer", true, 2, 2, "Settings", colors.cyan, colors.gray, function()
 	pages:disable("drawer")
 	shell.run("/system/settings", "drawer")
 	pages:enable("drawer")
+	pages:changeBgColor("drawer", getBgColorFromFile())
 end)
 
 local time = textutils.formatTime(os.time(), false)
@@ -54,7 +63,9 @@ for i = 2, #apps do
 		local icon = paintutils.loadImage(apps[i][4])
 		images:create("imgApp" .. apps[i][1], "drawer", true, x, (h / 2) - (imageGetSize(icon) / 2) + 3, icon, function()
 			if apps[i][5] ~= false then
+				pages:disable("drawer")
 				shell.run(apps[i][5])
+				pages:enable("drawer")
 			end
 		end)
 	end
