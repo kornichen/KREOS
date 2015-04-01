@@ -20,14 +20,14 @@ local file = fs.open("/system/config/config", "r")
 local data = file.readAll()
 file.close()
 local config = textutils.unserialize(data)
-local cfgBgColor = config[2][6][1]
+local cfgBgColor = config[3][6][1]
 
 local function changeColorInFile(newColor)
 	file = fs.open("/system/config/config", "r")
 	data = file.readAll()
 	file.close()
 	config = textutils.unserialize(data)
-	config[2][6][1] = newColor
+	config[3][6][1] = newColor
 	newData = textutils.serialize(config)
 	fs.delete("/system/config/config")
 	file = fs.open("/system/config/config", "w")

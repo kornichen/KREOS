@@ -1,9 +1,15 @@
 {
-  {
-    4,
-  },
+  {},
   {
     1,
+    1,
+    "Info",
+    "/system/images/icn_info",
+    false,
+    {},
+  },
+  {
+    2,
     1,
     "Color",
     "/system/images/icn_color",
@@ -13,7 +19,7 @@
     },
   },
   {
-    2,
+    3,
     1,
     "Clock",
     "/system/images/icn_clock",
@@ -23,7 +29,7 @@
     },
   },
   {
-    3,
+    4,
     1,
     "Interface",
     "/system/images/icn_interface",
@@ -33,11 +39,11 @@
     },
   },
   {
-    4,
-    1,
+    5,
+    2,
     "Applications",
     "/system/images/icn_applications",
     "/system/config_applications",
-    {}
-  }
+    {},
+  },
 }

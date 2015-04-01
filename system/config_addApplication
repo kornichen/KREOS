@@ -23,7 +23,36 @@ buttons:create("btnAddApplication", "config_addApplication", true, 2, 2, "Done",
 	error()
 end)
 
-inputboxes:create("ibTest", "config_addApplication", true, 2, 5, 10, colors.black, colors.lightGray)
+local currentIcon = 1
+local iconList = {}
+local imageFolder = fs.list("/system/images/")
+for i = 1, #imageFolder do
+	if string.sub(imageFolder[i], 1, 4) == "icn_" then
+		table.insert(iconList, paintutils.loadImage("/system/images/" .. imageFolder[i]))
+	end
+end
+
+labels:create("lbApplicationName", "config_addApplication", true, 2, 5, "Name:", colors.black, colors.white)
+inputboxes:create("ibApplicationName", "config_addApplication", true, 14, 5, 20, colors.black, colors.lightGray)
+labels:create("lbApplicationPath", "config_addApplication", true, 2, 9, "Path:", colors.black, colors.white)
+inputboxes:create("ibApplicationPath", "config_addApplication", true, 14, 9, 20, colors.black, colors.lightGray)
+images:create("imgIconSelection", "config_addApplication", true, 40, 5, iconList[1], function() end)
+buttons:create("btnIconSelectionLast", "config_addApplication", true, 40, 12, "<--", colors.black, colors.lightGray, function()
+	if currentIcon > 1 then
+		currentIcon = currentIcon - 1
+		images:changeImage("imgIconSelection", iconList[currentIcon])
+	end
+end)
+buttons:create("btnIconSelectionNext", "config_addApplication", true, 44, 12, "-->", colors.black, colors.lightGray, function()
+	if #iconList > currentIcon then
+		currentIcon = currentIcon + 1
+		images:changeImage("imgIconSelection", iconList[currentIcon])
+	end
+end)
+labels:create("lbFullscreen", "config_addApplication", true, 2, 13, "Fullscreen:", colors.black, colors.white)
+checkboxes:create("cbFullscreen", "config_addApplication", true, 14, 13, false, colors.black, colors.lightGray)
+labels:create("lbFullScreenInfo1", "config_addApplication", true, 2, 15, "Turn on the fullscreen mode if the application", colors.black, colors.white)
+labels:create("lbFullScreenInfo2", "config_addApplication", true, 2, 16, "needs the whole screen run correctly.", colors.black, colors.white)
 
 while true do
 	render:all(pages, buttons, inputboxes, labels, checkboxes, images)
