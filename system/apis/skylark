@@ -561,7 +561,11 @@ Render = {
 								write(" ")
 							end
 							term.setCursorPos(inputbox:getList()[j][4], inputbox:getList()[j][5])
-							write(inputbox:getList()[j][9])
+							if string.len(inputbox:getList()[j][9]) > inputbox:getList()[j][6] then
+								write(string.sub(inputbox:getList()[j][9], - inputbox:getList()[j][6]))
+							else
+								write(inputbox:getList()[j][9])
+							end
 						end
 					end
 				end
@@ -638,6 +642,51 @@ Action = {
 					if page:getList()[i][3] == true then
 						for j = 1, #inputbox:getList() do
 							if page:getList()[i][1] == inputbox:getList()[j][2] and inputbox:getList()[j][3] and arg2 >= inputbox:getList()[j][4] and arg2 < inputbox:getList()[j][4] + inputbox:getList()[j][6] and arg3 == inputbox:getList()[j][5] and arg1 == 1 then
+								local inputboxActive = true
+								local inputboxText = inputbox:getList()[j][9]
+								term.setCursorBlink(true)
+								while inputboxActive do
+									local event, arg1, arg2, arg3, arg4, arg5 = os.pullEvent()
+
+									if event == "key" and arg1 == 14 then
+										if string.len(inputboxText) > 0 then
+											inputboxText = string.sub(inputboxText, 1, string.len(inputboxText) - 1)
+											inputbox:changeValue(inputbox:getList()[j][1], inputboxText)
+										end
+									elseif event == "key" and arg1 == 28 then
+										inputboxActive = false
+										term.setCursorBlink(false)
+									elseif event == "char" then
+										inputboxText = inputboxText .. arg1
+										inputbox:changeValue(inputbox:getList()[j][1], inputboxText)
+									elseif event == "mouse_click" then
+										inputboxActive = false
+										term.setCursorBlink(false)
+									end
+
+									for k = 1, #page:getList() do
+										if page:getList()[k][3] == true then
+											if inputbox ~= false then
+												for l = 1, #inputbox:getList() do
+													if inputbox:getList()[l][2] == page:getList()[k][1] and inputbox:getList()[l][3] then
+														term.setTextColor(inputbox:getList()[l][7])
+														term.setBackgroundColor(inputbox:getList()[l][8])
+														term.setCursorPos(inputbox:getList()[l][4], inputbox:getList()[l][5])
+														for k = 1, inputbox:getList()[l][6] do
+															write(" ")
+														end
+														term.setCursorPos(inputbox:getList()[l][4], inputbox:getList()[l][5])
+														if string.len(inputbox:getList()[l][9]) > inputbox:getList()[l][6] then
+															write(string.sub(inputbox:getList()[l][9], - inputbox:getList()[l][6]))
+														else
+															write(inputbox:getList()[l][9])
+														end
+													end
+												end
+											end
+										end
+									end
+								end
 							end
 						end
 					end
