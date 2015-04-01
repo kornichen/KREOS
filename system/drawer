@@ -46,33 +46,91 @@ end)
 local time = textutils.formatTime(os.time(), false)
 labels:create("lbTime", "drawer", true, w - string.len(time), 2, time, colors.cyan, colors.gray)
 
-local x = 1
 local page = 1
-
-if apps[1][page] == 1 then
-	x = (w / 2) - 3
-elseif apps[1][page] == 2 then
-	x = (w / 2) - 6
-elseif apps[1][page] == 3 then
-	x = (w / 2) - 12
-elseif apps[1][page] >= 4 then
-	x = (w / 2) - 16
-end
+local appsIcons = {}
+local temp = 1
+local temp2 = 1
+appsIcons[1] = {}
 for i = 2, #apps do
-	if apps[i][2] == page then
-		local icon = paintutils.loadImage(apps[i][4])
-		images:create("imgApp" .. apps[i][1], "drawer", true, x, (h / 2) - (imageGetSize(icon) / 2) + 3, icon, function()
-			if apps[i][5] ~= false then
+	appsIcons[temp2][temp] = { apps[i][3], apps[i][4], apps[i][5] }
+	temp = temp + 1
+	if temp > 4 then
+		temp = 1
+		temp2 = temp2 + 1
+		appsIcons[temp2] = {}
+	end
+end
+local appsPages = #appsIcons
+
+if appsPages > 1 then
+	buttons:create("btnDrawerLast", "drawer", true, 2, h - 1, "<--", colors.black, colors.white, function()
+		if page > 1 then
+			page = page - 1
+		end
+	end)
+	buttons:create("btnDrawerNext", "drawer", true, w - 3, h - 1, "-->", colors.black, colors.white, function()
+		if page < appsPages then
+			page = page + 1
+		end
+	end)
+end
+
+for j = 1, appsPages do
+	local x = 1
+	if #appsIcons[page] == 1 then
+		x = (w / 2) - 3
+	elseif #appsIcons[page] == 2 then
+		x = (w / 2) - 6
+	elseif #appsIcons[page] == 3 then
+		x = (w / 2) - 12
+	elseif #appsIcons[page] >= 4 then
+		x = (w / 2) - 16
+	end
+
+	for i = 1, #appsIcons[j] do
+
+		if j == page then
+			local enabled = true
+		else
+			local enabled = false
+		end
+		local icon = paintutils.loadImage(appsIcons[j][i][2])
+
+		images:create("imgApp" .. j .. i, "drawer", enabled, x, (h / 2) - (imageGetSize(icon) / 2) + 3, icon, function()
+			if appsIcons[j][i][3] ~= false then
 				pages:disable("drawer")
-				shell.run(apps[i][5])
+				shell.run(appsIcons[j][i][3])
 				pages:enable("drawer")
 			end
 		end)
+		x = x + 9
 	end
-	x = x + 9
+end
+
+local function activateCurrentPage()
+	for j = 1, appsPages do
+		for i = 1, #appsIcons[j] do
+			if page == j then
+				images:enable("imgApp" .. j .. i)
+			else
+				images:disable("imgApp" .. j .. i)
+			end
+			if page == 1 then
+				buttons:disable("btnDrawerLast")
+				buttons:enable("btnDrawerNext")
+			elseif page == appsPages then
+				buttons:disable("btnDrawerNext")
+				buttons:enable("btnDrawerLast")
+			else
+				buttons:enable("btnDrawerNext")
+				buttons:enable("btnDrawerLast")
+			end
+		end
+	end
 end
 
 while true do
+	activateCurrentPage()
 	render:all(pages, buttons, inputboxes, labels, checkboxes, images)
 	time = textutils.formatTime(os.time(), false)
 	labels:changeText("lbTime", time)

@@ -12,15 +12,15 @@
   {
     2,
     1,
-    "Map",
-    "/system/images/icn_compass",
-    false,
+    "Console",
+    "/system/images/icn_console",
+    "shell",
   },
   {
     3,
     1,
-    "Console",
-    "/system/images/icn_console",
-    "shell",
+    "CCC",
+    "/system/images/icn_ccc",
+    "/applications/ccc",
   },
 }

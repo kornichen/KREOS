@@ -11,8 +11,42 @@ os.loadAPI("/system/apis/skylark")
 local newestVersion = http.get("http://www.lxnd.me/kreos/version").readLine()
 local file = fs.open("/system/config/version", "r")
 local installedVersion = file.readLine()
+file.close()
 if newestVersion > installedVersion then
-	-- update
+	print("Update found.")
+	write("Getting update list... ")
+	local updateList = textutils.unserialize(http.get("http://www.lxnd.me/kreos/updateList").readAll())
+	print("DONE.")
+	write("Creating temporary folder... ")
+	if fs.exists("/system/update/") then
+		fs.delete("/system/update/")
+	end
+	fs.makeDir("/system/update/")
+	print("DONE.")
+	print("Downloading files... ")
+	local file = ""
+	for i = 1, #updateList do
+		file = fs.open("/system/update" .. updateList[i], "w")
+		file.write(http.get("http://www.lxnd.me/kreos/files" .. updateList[i]).readAll())
+		file.close()
+		print("Downloaded " .. updateList[i] .. " (" .. i .. "/" .. #updateList .. ").")
+	end
+	print("DONE.")
+	write("Deleting old files... ")
+	for i = 1, #updateList do
+		fs.delete(updateList[i])
+	end
+	print("DONE.")
+	write("Copying new files... ")
+	for i = 1, #updateList do
+		fs.copy("/system/update" .. updateList[i], updateList[i])
+	end
+	print("DONE.")
+	write("Deleting temporary folder... ")
+	fs.delete("/system/update/")
+	print("DONE.")
+	print("Update complete. Rebooting...")
+	os.reboot()
 end
 
 shell.run("/system/drawer")

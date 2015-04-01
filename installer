@@ -1,0 +1,22 @@
+-- ========================================
+-- The KreOS 3.0 Skylark Installer
+-- Written by kornichen
+-- Lastly modified on 1st April 2015
+-- Licensed under General Public License V3
+-- ========================================
+
+print("Installing...")
+write("Getting installation list... ")
+local installationList = textutils.unserialize(http.get("http://www.lxnd.me/kreos/installationList").readAll())
+print("DONE.")
+print("Downloading files... ")
+local file = ""
+for i = 1, #installationList do
+	file = fs.open(installationList[i], "w")
+	file.write(http.get("http://www.lxnd.me/kreos/files" .. installationList[i]).readAll())
+	file.close()
+	print("Downloaded " .. installationList[i] .. " (" .. i .. "/" .. #installationList .. ").")
+end
+print("DONE.")
+print("Installation complete. Rebooting...")
+os.reboot()
