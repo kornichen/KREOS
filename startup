@@ -24,7 +24,7 @@ if newestVersion > installedVersion then
 	fs.makeDir("/system/update/")
 	print("DONE.")
 	print("Downloading files... ")
-	local file = ""
+	file = ""
 	for i = 1, #updateList do
 		file = fs.open("/system/update" .. updateList[i], "w")
 		file.write(http.get("http://www.lxnd.me/kreos/files" .. updateList[i]).readAll())
@@ -45,6 +45,15 @@ if newestVersion > installedVersion then
 	write("Deleting temporary folder... ")
 	fs.delete("/system/update/")
 	print("DONE.")
+	write("Completing update... ")
+	file = ""
+	if fs.exists("/system/config/version") then
+		fs.delete("/system/config/version")
+	end
+	file = fs.open("/system/config/version", "w")
+	file.writeLine(newestVersion)
+	file.close()
+	print("DONE. ")
 	print("Update complete. Rebooting...")
 	os.reboot()
 end

@@ -17,6 +17,16 @@ for i = 1, #installationList do
 	file.close()
 	print("Downloaded " .. installationList[i] .. " (" .. i .. "/" .. #installationList .. ").")
 end
+local newestVersion = http.get("http://www.lxnd.me/kreos/version").readLine()
 print("DONE.")
+write("Completing installation... ")
+file = ""
+if fs.exists("/system/config/version") then
+	fs.delete("/system/config/version")
+end
+file = fs.open("/system/config/version", "w")
+file.writeLine(newestVersion)
+file.close()
+print("DONE. ")
 print("Installation complete. Rebooting...")
 os.reboot()
