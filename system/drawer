@@ -1,7 +1,7 @@
 -- ========================================
 -- The KreOS 3.0 Skylark Drawer
 -- Written by kornichen
--- Lastly modified on 1st April 2015
+-- Lastly modified on 2nd April 2015
 -- Licensed under General Public License V3
 -- ========================================
 
@@ -29,6 +29,35 @@ local function getBgColorFromFile()
 	return config[3][6][1]
 end
 
+local function getClockConfigFromFile()
+	local file = fs.open("/system/config/config", "r")
+	local data = file.readAll()
+	file.close()
+	local config = textutils.unserialize(data)
+	return { config[4][6][1], config[4][6][2], config[4][6][3] }
+end
+
+local function getDateFromInternet(zone)
+	local dateTimeString = http.get("http://www.timeapi.org/" .. zone .. "/now").readAll()
+	local date = string.sub(dateTimeString, 1, 10)
+	return date
+end
+
+local function getTimeFromInternet(zone, seperated)
+	seperated = seperated or false
+	local dateTimeString = http.get("http://www.timeapi.org/" .. zone .. "/now").readAll()
+	if seperated then
+		local time = string.sub(dateTimeString, 12, 19)
+		local hours = string.sub(time, 1, 2)
+		local minutes = string.sub(time, 4, 5)
+		local seconds = string.sub(time, 7, 8)
+		return { hours, minutes, seconds }
+	else
+		local time = string.sub(dateTimeString, 12, 16)
+		return time
+	end
+end
+
 local file = fs.open("/system/config/apps", "r")
 local data = file.readAll()
 file.close()
@@ -43,7 +72,16 @@ buttons:create("btnDrawerSettings", "drawer", true, 2, 2, "Settings", colors.cya
 	pages:changeBgColor("drawer", getBgColorFromFile())
 end)
 
-local time = textutils.formatTime(os.time(), false)
+local time = ""
+
+if getClockConfigFromFile()[2] then
+	write("Fetching time... ")
+	time = getTimeFromInternet(getClockConfigFromFile()[3])
+	print("DONE.")
+else
+	time = textutils.formatTime(os.time(), getClockConfigFromFile()[1])
+end
+
 labels:create("lbTime", "drawer", true, w - string.len(time), 2, time, colors.cyan, colors.gray)
 
 local page = 1
@@ -75,6 +113,8 @@ if appsPages > 1 then
 	end)
 end
 
+local btnX = 1
+
 for j = 1, appsPages do
 	local x = 1
 	if #appsIcons[page] == 1 then
@@ -95,14 +135,41 @@ for j = 1, appsPages do
 			local enabled = false
 		end
 		local icon = paintutils.loadImage(appsIcons[j][i][2])
+		local text = appsIcons[j][i][1]
 
-		images:create("imgApp" .. j .. i, "drawer", enabled, x, (h / 2) - (imageGetSize(icon) / 2) + 3, icon, function()
+		images:create("imgApp" .. j .. i, "drawer", enabled, x, (h / 2) - (imageGetSize(icon) / 2) + 2, icon, function()
 			if appsIcons[j][i][3] ~= false then
 				pages:disable("drawer")
 				shell.run(appsIcons[j][i][3])
+				term.setCursorBlink(false)
 				pages:enable("drawer")
 			end
 		end)
+
+		if string.len(text) == 1 then
+			btnX = x + 3
+		elseif string.len(text) == 2 or string.len(text) == 3 then
+			btnX = x + 2
+		elseif string.len(text) == 4 or string.len(text) == 5 then
+			btnX = x + 1
+		elseif string.len(text) == 6 or string.len(text) == 7 then
+			btnX = x
+		elseif string.len(text) == 8 or string.len(text) == 9 then
+			btnX = x - 1
+		elseif string.len(text) == 10 or string.len(text) == 11 then
+			btnX = x - 2
+		else
+			btnX = x - 3
+		end
+		buttons:create("btnApp" .. j .. i, "drawer", enabled, btnX, (h / 2) + 6, text, colors.black, colors.white, function()
+			if appsIcons[j][i][3] ~= false then
+				pages:disable("drawer")
+				shell.run(appsIcons[j][i][3])
+				term.setCursorBlink(false)
+				pages:enable("drawer")
+			end
+		end)
+
 		x = x + 9
 	end
 end
@@ -112,8 +179,10 @@ local function activateCurrentPage()
 		for i = 1, #appsIcons[j] do
 			if page == j then
 				images:enable("imgApp" .. j .. i)
+				buttons:enable("btnApp" .. j .. i)
 			else
 				images:disable("imgApp" .. j .. i)
+				buttons:disable("btnApp" .. j .. i)
 			end
 			if page == 1 then
 				buttons:disable("btnDrawerLast")
@@ -129,11 +198,52 @@ local function activateCurrentPage()
 	end
 end
 
-while true do
-	activateCurrentPage()
-	render:all(pages, buttons, inputboxes, labels, checkboxes, images)
-	time = textutils.formatTime(os.time(), false)
-	labels:changeText("lbTime", time)
-	labels:changePosition("lbTime", w - string.len(time), 2)
-	action:pullEvent(pages, buttons, inputboxes, checkboxes, images)
+local clockTimer = os.startTimer(getClockConfigFromFile()[2] and 10 or 1)
+local clockType = getClockConfigFromFile()[1]
+local rtc = getClockConfigFromFile()[2]
+
+local function mainLoop()
+	while true do
+		activateCurrentPage()
+		render:all(pages, buttons, inputboxes, labels, checkboxes, images, event)
+		if not rtc then
+			time = textutils.formatTime(os.time(), getClockConfigFromFile()[1])
+			labels:changeText("lbTime", time)
+			labels:changePosition("lbTime", w - string.len(time), 2)
+		end
+		action:pullEvent(pages, buttons, inputboxes, checkboxes, images)
+		clockTimer = os.startTimer(1)
+	end
+end
+
+local function timeLoop()
+	local realTime = getTimeFromInternet(getClockConfigFromFile()[3], true)
+	local timeHours = tonumber(realTime[1])
+	local timeMinutes = tonumber(realTime[2])
+	local timeSeconds = tonumber(realTime[3])
+	while true do
+		time = timeHours .. ":" .. timeMinutes
+		labels:changeText("lbTime", time)
+		labels:changePosition("lbTime", w - string.len(time), 2)
+
+		timeSeconds = timeSeconds + 1
+		if timeSeconds >= 60 then
+			timeSeconds = 0
+			timeMinutes = timeMinutes + 1
+			if timeMinutes >= 60 then
+				timeMinutes = 0
+				timeHours = timeHours + 1
+			end
+			if timeHours >= 24 then
+				timeHours = 0
+			end
+		end
+		sleep(1000)
+	end
+end
+
+if rtc then
+	parallel.waitForAny(mainLoop, timeLoop)
+else
+	mainLoop()
 end

@@ -1,0 +1,102 @@
+-- ==========================================
+-- The KreOS 3.0 Skylark Edit Applications
+-- Written by kornichen
+-- Lastly modified on 2nd April 2015
+-- Licensed under General Public License V3
+-- ==========================================
+
+os.loadAPI("/system/apis/skylark")
+
+local args = { ... }
+
+if args[1] ~= "config_applications" then
+	error("This has to be started from KreOS.")
+end
+
+local pages, buttons, inputboxes, labels, checkboxes, scrollbars, images, render, action = skylark.init()
+local w, h = term.getSize()
+
+pages:create("config_editApplications", "Edit Applications", true, colors.white, true)
+
+buttons:create("btnAddApplication", "config_editApplications", true, 2, 2, "Done", colors.cyan, colors.gray, function()
+	pages:disable("config_editApplications")
+	error()
+end)
+
+local file = fs.open("/system/config/apps", "r")
+local data = file.readAll()
+file.close()
+local apps = {}
+for i = 2, #textutils.unserialize(data) do
+	apps[i - 1] = textutils.unserialize(data)[i]
+end
+
+local x = (w / 2) - 3
+local labelX = 1
+local currentApp = 1
+local appIcon = paintutils.loadImage(apps[currentApp][4])
+local text = apps[currentApp][3]
+
+if string.len(text) == 1 then
+	labelX = x + 3
+elseif string.len(text) == 2 or string.len(text) == 3 then
+	labelX = x + 2
+elseif string.len(text) == 4 or string.len(text) == 5 then
+	labelX = x + 1
+elseif string.len(text) == 6 or string.len(text) == 7 then
+	labelX = x
+elseif string.len(text) == 8 or string.len(text) == 9 then
+	labelX = x - 1
+elseif string.len(text) == 10 or string.len(text) == 11 then
+	labelX = x - 2
+else
+	labelX = x - 3
+end
+
+local function switchApp()
+	images:changeImage("imgApplicationIcon", paintutils.loadImage(apps[currentApp][4]))
+	text = apps[currentApp][3]
+	labels:changeText("lbApplicationName", text)
+	if string.len(text) == 1 then
+		labelX = x + 3
+	elseif string.len(text) == 2 or string.len(text) == 3 then
+		labelX = x + 2
+	elseif string.len(text) == 4 or string.len(text) == 5 then
+		labelX = x + 1
+	elseif string.len(text) == 6 or string.len(text) == 7 then
+		labelX = x
+	elseif string.len(text) == 8 or string.len(text) == 9 then
+		labelX = x - 1
+	elseif string.len(text) == 10 or string.len(text) == 11 then
+		labelX = x - 2
+	else
+		labelX = x - 3
+	end
+	labels:changePosition("lbApplicationName", labelX, 12)
+end
+
+images:create("imgApplicationIcon", "config_editApplications", true, x, 5, appIcon, function() end)
+labels:create("lbApplicationName", "config_editApplications", true, labelX, 12, text, colors.black, colors.white)
+
+buttons:create("btnLastApplication", "config_editApplications", true, x, 14, "<--", colors.black, colors.lightGray, function()
+	if currentApp > 1 then
+		currentApp = currentApp - 1
+		switchApp()
+	end
+end)
+buttons:create("btnNextApplication", "config_editApplications", true, x + 4, 14, "-->", colors.black, colors.lightGray, function()
+	if currentApp < #apps then
+		currentApp = currentApp + 1
+		switchApp()
+	end
+end)
+buttons:create("btnDeleteApplication", "config_editApplications", true, x + 1, 17, "Edit!", colors.black, colors.lightGray, function()
+	pages:disable("config_editApplications")
+	shell.run("/system/config_editApplication", "config_editApplications", currentApp)
+	pages:enable("config_editApplications")
+end)
+
+while true do
+	render:all(pages, buttons, inputboxes, labels, checkboxes, images)
+	action:pullEvent(pages, buttons, inputboxes, checkboxes, images)
+end

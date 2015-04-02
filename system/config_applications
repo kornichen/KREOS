@@ -1,7 +1,7 @@
 -- ==========================================
 -- The KreOS 3.0 Skylark Application Settings
 -- Written by kornichen
--- Lastly modified on 1st April 2015
+-- Lastly modified on 2nd April 2015
 -- Licensed under General Public License V3
 -- ==========================================
 
@@ -28,16 +28,22 @@ buttons:create("btnAddApplication", "config_applications", true, 2, 5, "Add appl
 	shell.run("/system/config_addApplication", "config_applications")
 	pages:enable("config_applications")
 end)
-buttons:create("btnDeleteApplication", "config_applications", true, 2, 9, "Delete application", colors.black, colors.lightGray, function()
+labels:create("lbAddApplication", "config_applications", true, 2, 7, "Add an application to the drawer.", colors.black, colors.white)
+labels:create("lbAddApplication2", "config_applications", true, 2, 8, "Please copy it to /applications first.", colors.black, colors.white)
+buttons:create("btnDeleteApplication", "config_applications", true, 2, 10, "Delete application", colors.black, colors.lightGray, function()
 	pages:disable("config_applications")
 	shell.run("/system/config_deleteApplication", "config_applications")
 	pages:enable("config_applications")
 end)
-buttons:create("btnListApplications", "config_applications", true, 2, 13, "List applications", colors.black, colors.lightGray, function()
+labels:create("lbDeleteApplication", "config_applications", true, 2, 12, "Delete an application from the drawer. It will", colors.black, colors.white)
+labels:create("lbDeleteApplication2", "config_applications", true, 2, 13, "be automatically deleted from /applications (!)", colors.black, colors.white)
+labels:create("lbDeleteApplication3", "config_applications", true, 2, 14, "If needed make a backup before deleting.", colors.black, colors.white)
+buttons:create("btnEditApplications", "config_applications", true, 2, 16, "Edit applications", colors.black, colors.lightGray, function()
 	pages:disable("config_applications")
-	shell.run("/system/config_listApplications", "config_applications")
+	shell.run("/system/config_editApplications", "config_applications")
 	pages:enable("config_applications")
 end)
+labels:create("lbEditApplications", "config_applications", true, 2, 18, "Edit installed applications.", colors.black, colors.white)
 
 while true do
 	render:all(pages, buttons, inputboxes, labels, checkboxes, images)

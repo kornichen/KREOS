@@ -1,5 +1,5 @@
 -- Computer Craft Commander by kornichen
--- Recently modified on 04 February 2015
+-- Recently modified on 02 February 2015
 
 local w, h = term.getSize()
 local currentScreen = "mainScreen"

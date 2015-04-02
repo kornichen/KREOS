@@ -1,5 +1,5 @@
 -- ==========================================
--- The KreOS 3.0 Skylark Add Application
+-- The KreOS 3.0 Skylark Edit Application
 -- Written by kornichen
 -- Lastly modified on 2nd April 2015
 -- Licensed under General Public License V3
@@ -9,9 +9,11 @@ os.loadAPI("/system/apis/skylark")
 
 local args = { ... }
 
-if args[1] ~= "config_applications" then
+if args[1] ~= "config_editApplications" then
 	error("This has to be started from KreOS.")
 end
+
+local appToEdit = args[2]
 
 local pages, buttons, inputboxes, labels, checkboxes, scrollbars, images, render, action = skylark.init()
 local w, h = term.getSize()
@@ -25,18 +27,21 @@ local function saveChangesToFile()
 	file.close()
 	fs.delete("/system/config/apps")
 	local apps = textutils.unserialize(data)
-	local newApp = {
-		math.random(10000),
-		1,
-		inputboxes:getValue("ibApplicationName"),
-		iconList[currentIcon][2],
-		inputboxes:getValue("ibApplicationPath"),
-		checkboxes:isActivated("cbFullscreen")
-	}
-	table.insert(apps, newApp)
+	apps[appToEdit + 1][3] = inputboxes:getValue("ibApplicationName")
+	apps[appToEdit + 1][4] = iconList[currentIcon][2]
+	apps[appToEdit + 1][5] = inputboxes:getValue("ibApplicationPath")
+	apps[appToEdit + 1][6] = checkboxes:isActivated("cbFullscreen")
 	local newFile = fs.open("/system/config/apps", "w")
 	newFile.write(textutils.serialize(apps))
 	newFile.close()
+end
+
+local function getAppFromFile()
+	local file = fs.open("/system/config/apps", "r")
+	local data = file.readAll()
+	file.close()
+	local appTable = textutils.unserialize(data)
+	return { appTable[appToEdit + 1][1], appTable[appToEdit + 1][2], appTable[appToEdit + 1][3], appTable[appToEdit + 1][4], appTable[appToEdit + 1][5], appTable[appToEdit + 1][6] }
 end
 
 local function removeErrorLabels()
@@ -73,11 +78,17 @@ for i = 1, #imageFolder do
 	end
 end
 
+local app = getAppFromFile()
+
 labels:create("lbApplicationName", "config_addApplication", true, 2, 5, "Name:", colors.black, colors.white)
 inputboxes:create("ibApplicationName", "config_addApplication", true, 14, 5, 20, colors.black, colors.lightGray)
+inputboxes:changeValue("ibApplicationName", app[3])
 labels:create("lbNoApplicationName", "config_addApplication", false, 14, 7, "Enter a name.", colors.red, colors.white)
 labels:create("lbApplicationPath", "config_addApplication", true, 2, 9, "Path:", colors.black, colors.white)
 inputboxes:create("ibApplicationPath", "config_addApplication", true, 14, 9, 20, colors.black, colors.lightGray)
+if app[5] ~= false then
+	inputboxes:changeValue("ibApplicationPath", app[5])
+end
 labels:create("lbNoApplicationPath", "config_addApplication", false, 14, 11, "Enter a path.", colors.red, colors.white)
 images:create("imgIconSelection", "config_addApplication", true, 40, 5, iconList[1][1], function() end)
 buttons:create("btnIconSelectionLast", "config_addApplication", true, 40, 12, "<--", colors.black, colors.lightGray, function()
@@ -94,6 +105,9 @@ buttons:create("btnIconSelectionNext", "config_addApplication", true, 44, 12, "-
 end)
 labels:create("lbFullscreen", "config_addApplication", true, 2, 13, "Fullscreen:", colors.black, colors.white)
 checkboxes:create("cbFullscreen", "config_addApplication", true, 14, 13, false, colors.black, colors.lightGray)
+if app[6] then
+	checkboxes:activate("cbFullscreen")
+end
 labels:create("lbFullScreenInfo1", "config_addApplication", true, 2, 15, "Turn on the fullscreen mode if the application", colors.black, colors.white)
 labels:create("lbFullScreenInfo2", "config_addApplication", true, 2, 16, "needs the whole screen to run correctly.", colors.black, colors.white)
 

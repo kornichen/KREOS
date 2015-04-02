@@ -1,0 +1,72 @@
+-- ========================================
+-- The KreOS 3.0 Skylark Clock Settings
+-- Written by kornichen
+-- Lastly modified on 2nd April 2015
+-- Licensed under General Public License V3
+-- ========================================
+
+os.loadAPI("/system/apis/skylark")
+
+local args = { ... }
+
+if args[1] ~= "settings" then
+	error("This has to be started from KreOS.")
+end
+
+local pages, buttons, inputboxes, labels, checkboxes, scrollbars, images, render, action = skylark.init()
+local w, h = term.getSize()
+
+local function changeSettingsInFile(twentyFourHours, useRTC, timeZone)
+	file = fs.open("/system/config/config", "r")
+	data = file.readAll()
+	file.close()
+	config = textutils.unserialize(data)
+	config[4][6][1] = twentyFourHours
+	config[4][6][2] = useRTC
+	config[4][6][3] = timeZone
+	newData = textutils.serialize(config)
+	fs.delete("/system/config/config")
+	file = fs.open("/system/config/config", "w")
+	file.write(newData)
+	file.close()
+end
+
+local function getSettingsFromFile()
+	file = fs.open("/system/config/config", "r")
+	data = file.readAll()
+	file.close()
+	config = textutils.unserialize(data)
+	local twentyFourHours = config[4][6][1]
+	local useRTC = config[4][6][2]
+	local timeZone = config[4][6][3]
+	return twentyFourHours, useRTC, timeZone
+end
+
+pages:create("config_clock", "Clock Settings", true, colors.white, true)
+
+buttons:create("btnCfgClockSettings", "config_clock", true, 2, 2, "Settings", colors.cyan, colors.gray, function()
+	changeSettingsInFile(checkboxes:isActivated("cb24hours"), checkboxes:isActivated("cbUseRTC"), inputboxes:getValue("ibTimeZone"))
+	pages:disable("config_clock")
+	error()
+end)
+
+local twentyFourHours, useRTC, timeZone = getSettingsFromFile()
+
+labels:create("lb24hours", "config_clock", true, 2, 5, "24 hours: ", colors.black, colors.white)
+checkboxes:create("cb24hours", "config_clock", true, 12, 5, twentyFourHours, colors.black, colors.lightGray)
+labels:create("lbRTC", "config_clock", true, 2, 7, "=== R E A L - T I M E  C L O C K ===", colors.black, colors.white)
+labels:create("lbUseRTC", "config_clock", true, 2, 9, "Use RTC: ", colors.black, colors.white)
+checkboxes:create("cbUseRTC", "config_clock", true, 11, 9, useRTC, colors.black, colors.lightGray)
+labels:create("lbRTCinfo", "config_clock", true, 2, 11, "Please notice that RTC is still WIP and", colors.black, colors.white)
+labels:create("lbRTCinfo2", "config_clock", true, 2, 12, "might be buggy. Requires internet connection.", colors.black, colors.white)
+labels:create("lbTimeZone", "config_clock", true, 2, 14, "Time zone: ", colors.black, colors.white)
+inputboxes:create("ibTimeZone", "config_clock", true, 13, 14, 6, colors.black, colors.lightGray)
+inputboxes:changeValue("ibTimeZone", timeZone)
+labels:create("lbTimeZoneInfo", "config_clock", true, 2, 16, "Enter your time zone code. Example: CET for", colors.black, colors.white)
+labels:create("lbTimeZoneInfo2", "config_clock", true, 2, 17, "Central European Time. You can get your time zone", colors.black, colors.white)
+labels:create("lbTimeZoneInfo3", "config_clock", true, 2, 18, "code on http://bit.ly/17pKjJV", colors.black, colors.white)
+
+while true do
+	render:all(pages, buttons, inputboxes, labels, checkboxes, images)
+	action:pullEvent(pages, buttons, inputboxes, checkboxes, images)
+end

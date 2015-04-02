@@ -5,7 +5,7 @@
     1,
     "Info",
     "/system/images/icn_info",
-    false,
+    "/system/config_info",
     {},
   },
   {
@@ -23,9 +23,11 @@
     1,
     "Clock",
     "/system/images/icn_clock",
-    false,
+    "/system/config_clock",
     {
       true,
+      true,
+      "cet",
     },
   },
   {

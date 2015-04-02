@@ -1,7 +1,7 @@
 -- ========================================
 -- The KreOS 3.0 Skylark Settings
 -- Written by kornichen
--- Lastly modified on 1st April 2015
+-- Lastly modified on 2nd April 2015
 -- Licensed under General Public License V3
 -- ========================================
 
@@ -68,6 +68,8 @@ if settingsPages > 1 then
 	end)
 end
 
+local btnX = 1
+
 for j = 1, settingsPages do
 	local x = 1
 	if #settingsIcons[page] == 1 then
@@ -88,14 +90,39 @@ for j = 1, settingsPages do
 			local enabled = false
 		end
 		local icon = paintutils.loadImage(settingsIcons[j][i][2])
+		local text = settingsIcons[j][i][1]
 
-		images:create("imgApp" .. j .. i, "settings", enabled, x, (h / 2) - (imageGetSize(icon) / 2) + 3, icon, function()
+		images:create("imgApp" .. j .. i, "settings", enabled, x, (h / 2) - (imageGetSize(icon) / 2) + 2, icon, function()
 			if settingsIcons[j][i][3] ~= false then
 				pages:disable("settings")
 				shell.run(settingsIcons[j][i][3], "settings")
 				pages:enable("settings")
 			end
 		end)
+
+		if string.len(text) == 1 then
+			btnX = x + 3
+		elseif string.len(text) == 2 or string.len(text) == 3 then
+			btnX = x + 2
+		elseif string.len(text) == 4 or string.len(text) == 5 then
+			btnX = x + 1
+		elseif string.len(text) == 6 or string.len(text) == 7 then
+			btnX = x
+		elseif string.len(text) == 8 or string.len(text) == 9 then
+			btnX = x - 1
+		elseif string.len(text) == 10 or string.len(text) == 11 then
+			btnX = x - 2
+		else
+			btnX = x - 3
+		end
+		buttons:create("btnApp" .. j .. i, "settings", enabled, btnX, (h / 2) + 6, text, colors.black, colors.white, function()
+			if settingsIcons[j][i][3] ~= false then
+				pages:disable("settings")
+				shell.run(settingsIcons[j][i][3])
+				pages:enable("settings")
+			end
+		end)
+
 		x = x + 9
 	end
 end
@@ -105,8 +132,10 @@ local function activateCurrentPage()
 		for i = 1, #settingsIcons[j] do
 			if page == j then
 				images:enable("imgApp" .. j .. i)
+				buttons:enable("btnApp" .. j .. i)
 			else
 				images:disable("imgApp" .. j .. i)
+				buttons:disable("btnApp" .. j .. i)
 			end
 			if page == 1 then
 				buttons:disable("btnSettingsLast")

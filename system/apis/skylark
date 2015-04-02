@@ -1,7 +1,7 @@
 -- ========================================
 -- The KreOS 3.0 Skylark API
 -- Written by kornichen
--- Lastly modified on 31st March 2015
+-- Lastly modified on 2nd March 2015
 -- Licensed under General Public License V3
 -- ========================================
 
@@ -441,6 +441,13 @@ Checkbox = {
 				self.checkboxes[i][8] = backgroundColor
 			end
 		end
+	end,
+	isActivated = function (self, internalName)
+		for i = 1, #self.checkboxes do
+			if self.checkboxes[i][1] == internalName then
+				return self.checkboxes[i][6]
+			end
+		end
 	end
 }
 
@@ -651,6 +658,11 @@ Action = {
 							if page:getList()[i][1] == inputbox:getList()[j][2] and inputbox:getList()[j][3] and arg2 >= inputbox:getList()[j][4] and arg2 < inputbox:getList()[j][4] + inputbox:getList()[j][6] and arg3 == inputbox:getList()[j][5] and arg1 == 1 then
 								local inputboxActive = true
 								local inputboxText = inputbox:getList()[j][9]
+								local cursorOffset = string.len(inputbox:getList()[j][9])
+								if cursorOffset > inputbox:getList()[j][6] then
+									cursorOffset = inputbox:getList()[j][6]
+								end
+								term.setCursorPos(inputbox:getList()[j][4] + cursorOffset, inputbox:getList()[j][5])
 								term.setCursorBlink(true)
 								while inputboxActive do
 									local event, arg1, arg2, arg3, arg4, arg5 = os.pullEvent()

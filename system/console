@@ -1,0 +1,14 @@
+-- ========================================
+-- The KreOS 3.0 Skylark Console
+-- Written by kornichen
+-- Lastly modified on 2nd April 2015
+-- Licensed under General Public License V3
+-- ========================================
+
+term.setTextColor(colors.yellow)
+term.setBackgroundColor(colors.black)
+term.clear()
+term.setCursorPos(1, 1)
+print("You can always exit the console by entering 'exit'.")
+term.setCursorBlink(true)
+shell.run("shell")
