@@ -1,7 +1,7 @@
 -- ========================================
 -- The KreOS 3.0 Skylark Drawer
 -- Written by kornichen
--- Lastly modified on 2nd April 2015
+-- Lastly modified on 6th April 2015
 -- Licensed under General Public License V3
 -- ========================================
 
@@ -58,6 +58,14 @@ local function getTimeFromInternet(zone, seperated)
 	end
 end
 
+local function setStatusText(statusText)
+	term.setTextColor(colors.black)
+	term.setBackgroundColor(colors.white)
+	term.setCursorPos((w / 2) - (string.len(statusText) / 2), h - 2)
+	term.clearLine()
+	term.write(statusText)
+end
+
 local file = fs.open("/system/config/apps", "r")
 local data = file.readAll()
 file.close()
@@ -75,9 +83,8 @@ end)
 local time = ""
 
 if getClockConfigFromFile()[2] then
-	write("Fetching time... ")
+	setStatusText("Fetching time")
 	time = getTimeFromInternet(getClockConfigFromFile()[3])
-	print("DONE.")
 else
 	time = textutils.formatTime(os.time(), getClockConfigFromFile()[1])
 end

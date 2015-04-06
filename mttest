@@ -1,0 +1,70 @@
+local function f1()
+	while true do
+		local a1, a2, a3, a4, a5 = os.pullEvent()
+		if a1 == "key" and a2 == 59 then
+			print("exit")
+			error()
+		end
+	end
+end
+
+local i = 0
+
+local function f2()
+	while true do
+		local x, y = term.getCursorPos()
+		term.setCursorPos(1, 1)
+		term.clearLine()
+		print(i)
+		term.setCursorPos(x, y)
+		i = i + 1
+		sleep(1)
+	end
+end
+
+local function f3()
+	shell.run("shell")
+end
+
+local co1 = coroutine.create(f1)
+local co2 = coroutine.create(f2)
+local co3 = coroutine.create(f3)
+
+local coroutines = {co1, co2, co3}
+local parameters = {}
+local event = {}
+local livingCoroutines = #coroutines
+
+while true do
+	for i = 1, #coroutines do
+		if coroutines[i] then
+			if parameters[coroutines[i]] == nil or parameters[coroutines[i]] == event[1] or event[1] == "terminate" then
+				local ok, param = coroutine.resume(coroutines[i], unpack(event))
+
+				if not ok then
+					error(param)
+				else
+					parameters[coroutines[i]] = param
+				end
+
+				if coroutine.status(coroutines[i]) == "dead" then
+					coroutines[i] = nil
+					livingCoroutines = livingCoroutines - 1
+					if livingCoroutines <= 2 then
+						return true
+					end
+				end
+			end
+		end
+	end
+	for i = 1, #coroutines do
+		if coroutines[i] and coroutine.status(coroutines[i]) == "dead" then
+			coroutines[i] = nil
+			livingCoroutines = livingCoroutines - 1
+			if livingCoroutines <= 2 then
+				return true
+			end
+		end
+	end
+	event = { os.pullEventRaw() }
+end

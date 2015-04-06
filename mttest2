@@ -1,0 +1,69 @@
+local function f1()
+	while true do
+		local a1, a2, a3, a4, a5 = os.pullEvent()
+		if a1 == "key" and a2 == 59 then
+			print("exit")
+			error()
+		end
+	end
+end
+
+local i = 0
+
+local function f2()
+	while true do
+		local x, y = term.getCursorPos()
+		term.setCursorPos(1, 1)
+		term.clearLine()
+		print(i)
+		term.setCursorPos(x, y)
+		i = i + 1
+		sleep(1)
+	end
+end
+
+local function f3()
+	shell.run("shell")
+end
+
+local _routines = {coroutine.create(f1), coroutine.create(f2), coroutine.create(f3)}
+local _limit = 2
+
+local count = #_routines
+local living = count
+
+local tFilters = {}
+local eventData = {}
+while true do
+	for n=1,count do
+		local r = _routines[n]
+		if r then
+			if tFilters[r] == nil or tFilters[r] == eventData[1] or eventData[1] == "terminate" then
+    			local ok, param = coroutine.resume( r, unpack(eventData) )
+				if not ok then
+					error( param, 0 )
+				else
+					tFilters[r] = param
+				end
+				if coroutine.status( r ) == "dead" then
+					_routines[n] = nil
+					living = living - 1
+					if living <= _limit then
+						return n
+					end
+				end
+			end
+		end
+	end
+	for n=1,count do
+		local r = _routines[n]
+		if r and coroutine.status( r ) == "dead" then
+			_routines[n] = nil
+			living = living - 1
+			if living <= _limit then
+				return n
+			end
+		end
+	end
+	eventData = { os.pullEventRaw() }
+end
