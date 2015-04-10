@@ -1,32 +1,79 @@
 -- ========================================
 -- The KreOS 3.0 Skylark Installer
 -- Written by kornichen
--- Lastly modified on 1st April 2015
+-- Lastly modified on 10th April 2015
 -- Licensed under General Public License V3
 -- ========================================
 
-print("Installing...")
-write("Getting installation list... ")
-local installationList = textutils.unserialize(http.get("http://www.lxnd.me/kreos/installationList").readAll())
-print("DONE.")
-print("Downloading files... ")
-local file = ""
-for i = 1, #installationList do
-	file = fs.open(installationList[i], "w")
-	file.write(http.get("http://www.lxnd.me/kreos/files" .. installationList[i]).readAll())
+local k1 = {{0,256,256,0,0,256,},{0,0,256,0,256,},{0,0,256,256,},{0,0,256,0,256,},{0,0,256,0,0,256,},{0,256,256,0,0,256,}}
+local k2 = {{0,128,128,0,0,128,},{0,0,128,0,128,},{0,0,128,128,},{0,0,128,0,128,},{0,0,128,0,0,128,},{0,128,128,0,0,128,}}
+
+local w, h = term.getSize()
+
+term.setTextColor(colors.lightGray)
+term.setBackgroundColor(colors.white)
+term.clear()
+term.setCursorPos((w / 2) - (string.len("KreOS 3.01 Skylark by kornichen") / 2), 2)
+term.write("KreOS 3.01 Skylark by kornichen")
+
+local function setStatusText(statusText)
+	term.setTextColor(colors.black)
+	term.setBackgroundColor(colors.white)
+	term.setCursorPos((w / 2) - (string.len(statusText) / 2), h - 2)
+	term.clearLine()
+	term.write(statusText)
+end
+
+function installKreOS()
+	setStatusText("Installing")
+	setStatusText("Getting installation list")
+	local installationList = textutils.unserialize(http.get("http://www.lxnd.me/kreos/installationList").readAll())
+	setStatusText("Downloading files")
+	local file = ""
+	for i = 1, #installationList do
+		file = fs.open(installationList[i], "w")
+		file.write(http.get("http://www.lxnd.me/kreos/files" .. installationList[i]).readAll())
+		file.close()
+		setStatusText("Downloaded " .. installationList[i] .. " (" .. i .. "/" .. #installationList .. ")")
+	end
+	local newestVersion = http.get("http://www.lxnd.me/kreos/version").readLine()
+	setStatusText("Completing installation")
+	file = ""
+	if fs.exists("/system/config/version") then
+		fs.delete("/system/config/version")
+	end
+	file = fs.open("/system/config/version", "w")
+	file.writeLine(newestVersion)
 	file.close()
-	print("Downloaded " .. installationList[i] .. " (" .. i .. "/" .. #installationList .. ").")
+	setStatusText("Installation complete. Rebooting")
+	os.reboot()
 end
-local newestVersion = http.get("http://www.lxnd.me/kreos/version").readLine()
-print("DONE.")
-write("Completing installation... ")
-file = ""
-if fs.exists("/system/config/version") then
-	fs.delete("/system/config/version")
+
+function drawLogo()
+	while true do
+		paintutils.drawImage(k1, (w / 2) - 2, (h / 2) - 2)
+		sleep(0.075)
+		term.setBackgroundColor(colors.white)
+		for i = 1, 6 do
+			term.setCursorPos(1, ((h / 2) - 3) + i)
+			term.clearLine()
+		end
+		paintutils.drawImage(k2, (w / 2) - 2, (h / 2) - 2)
+		sleep(0.5)
+		term.setBackgroundColor(colors.white)
+		for i = 1, 6 do
+			term.setCursorPos(1, ((h / 2) - 3) + i)
+			term.clearLine()
+		end
+		paintutils.drawImage(k1, (w / 2) - 2, (h / 2) - 2)
+		sleep(0.075)
+		term.setBackgroundColor(colors.white)
+		for i = 1, 6 do
+			term.setCursorPos(1, ((h / 2) - 3) + i)
+			term.clearLine()
+		end
+		sleep(0.5)
+	end
 end
-file = fs.open("/system/config/version", "w")
-file.writeLine(newestVersion)
-file.close()
-print("DONE. ")
-print("Installation complete. Rebooting...")
-os.reboot()
+
+parallel.waitForAny(installKreOS, drawLogo)
