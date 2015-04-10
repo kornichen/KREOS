@@ -1,0 +1,5 @@
+{
+	{"drawer-home", "Home"},
+	{"drawer-fetching-time", "Fetching time"},
+	{"drawer-settings", "Settings"},
+}

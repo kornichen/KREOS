@@ -1,0 +1,79 @@
+-- ========================================
+-- The KreOS 3.0 Skylark Startup
+-- Written by kornichen
+-- Lastly modified on 7th April 2015
+-- Licensed under General Public License V3
+-- ========================================
+
+local bootup_logo = paintutils.loadImage("/system/images/bootup_logo")
+local w, h = term.getSize()
+
+term.setTextColor(colors.lightGray)
+term.setBackgroundColor(colors.white)
+term.clear()
+term.setCursorPos((w / 2) - (string.len("KreOS 3.01 Skylark by kornichen") / 2), 2)
+term.write("KreOS 3.01 Skylark by kornichen")
+paintutils.drawImage(bootup_logo, (w / 2) - 2, (h / 2) - 2)
+
+local function setStatusText(statusText)
+	term.setTextColor(colors.black)
+	term.setBackgroundColor(colors.white)
+	term.setCursorPos((w / 2) - (string.len(statusText) / 2), h - 2)
+	term.clearLine()
+	term.write(statusText)
+end
+
+setStatusText("Loading Skylark API")
+os.loadAPI("/system/apis/skylark")
+
+-- Checking for updates
+setStatusText("Checking for updates")
+local data = http.get("http:/www.lxnd.me/kreos/version")
+if data then
+	local newestVersion = data.readLine()
+else
+	local newestVersion = 0
+end
+local file = fs.open("/system/config/version", "r")
+local installedVersion = file.readLine()
+file.close()
+if newestVersion > installedVersion then
+	setStatusText("Update found")
+	setStatusText("Getting update list")
+	local updateList = textutils.unserialize(http.get("http://www.lxnd.me/kreos/updateList").readAll())
+	setStatusText("Creating temporary folder")
+	if fs.exists("/system/update/") then
+		fs.delete("/system/update/")
+	end
+	fs.makeDir("/system/update/")
+	setStatusText("Downloading files")
+	file = ""
+	for i = 1, #updateList do
+		file = fs.open("/system/update" .. updateList[i], "w")
+		file.write(http.get("http://www.lxnd.me/kreos/files" .. updateList[i]).readAll())
+		file.close()
+		setStatusText("Downloaded " .. updateList[i] .. " (" .. i .. "/" .. #updateList .. ").")
+	end
+	setStatusText("Deleting old files")
+	for i = 1, #updateList do
+		fs.delete(updateList[i])
+	end
+	setStatusText("Copying new files")
+	for i = 1, #updateList do
+		fs.copy("/system/update" .. updateList[i], updateList[i])
+	end
+	setStatusText("Deleting temporary folder")
+	fs.delete("/system/update/")
+	setStatusText("Completing update")
+	file = ""
+	if fs.exists("/system/config/version") then
+		fs.delete("/system/config/version")
+	end
+	file = fs.open("/system/config/version", "w")
+	file.writeLine(newestVersion)
+	file.close()
+	setStatusText("Update complete. Rebooting")
+	os.reboot()
+end
+
+shell.run("/system/drawer")

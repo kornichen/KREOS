@@ -1,0 +1,115 @@
+-- ========================================
+-- The KreOS 3.0 Skylark Files
+-- Written by kornichen
+-- Lastly modified on 7th April 2015
+-- Licensed under General Public License V3
+-- ========================================
+
+os.loadAPI("/system/apis/skylark")
+
+local pages, buttons, inputboxes, labels, checkboxes, scrollbars, images, render, action, lines = skylark.init()
+local w, h = term.getSize()
+local currentFolder = "/"
+local currentFirstFile = 1
+
+pages:create("files", "Files", true, colors.white, true)
+
+buttons:create("btnFilesDrawer", "files", true, 2, 2, "Drawer", colors.cyan, colors.gray, function()
+	pages:disable("files")
+	error()
+end)
+
+labels:create("lbLocations", "files", true, 2, 5, "Locations", colors.gray, colors.white)
+buttons:create("btnDocuments", "files", true, 2, 7, "Documents", colors.black, colors.white, function()
+end)
+buttons:create("btnApplications", "files", true, 2, 8, "Applications", colors.black, colors.white, function()
+	currentFolder = "/applications"
+end)
+labels:create("lbPeripherals", "files", true, 2, 10, "Peripherals", colors.gray, colors.white)
+buttons:create("btnBack", "files", true, 18, 4, "<--", colors.black, colors.lightGray, function() end)
+buttons:create("btnUp", "files", true, 22, 4, "UP", colors.black, colors.lightGray, function() end)
+inputboxes:create("ibCurrentFolder", "files", true, 25, 4, 26, colors.black, colors.lightGray)
+inputboxes:changeValue("ibCurrentFolder", currentFolder)
+lines:create("lnLeftBarSeperation", "files", true, 16, 4, 16, h, colors.gray)
+lines:create("lnTopBar", "files", true, 17, 4, w, 4, colors.lightGray)
+
+local x = 19
+local y = 6
+for i = 1, 8 do
+	images:create("imgFile" .. i, "files", false, x, y, paintutils.loadImage("/system/images/files_folder"), function() end)
+	buttons:create("btnFile" .. i, "files", true, x - 2, y + 5, "", colors.black, colors.white, function() end)
+	x = x + 9
+	if x + 4 > w - 1 then
+		x = 19
+		y = y + 7
+	end
+end
+
+local function renderIcons()
+	local fileList = fs.list(currentFolder)
+	local fileAmount = 1
+	if #fileList > 8 then
+		fileAmount = 8
+	else
+		fileAmount = #fileList
+	end
+	for i = 1, 8 do
+		if i <= fileAmount then
+			images:enable("imgFile" .. i)
+			buttons:enable("btnFile" .. i)
+		else
+			images:disable("imgFile" .. i)
+			buttons:disable("btnFile" .. i)
+		end
+	end
+	local x = 19
+	local y = 6
+	local text = ""
+	for i = 1, fileAmount do
+		if fs.isDir(currentFolder .. "/" .. fileList[i]) then
+			images:changeImage("imgFile" .. i, paintutils.loadImage("/system/images/files_folder"))
+			images:changeOnClick("imgFile" .. i, function()
+				currentFolder = currentFolder .. "/" .. fileList[i]
+			end)
+		else
+			images:changeImage("imgFile" .. i, paintutils.loadImage("/system/images/files_file"))
+			images:changeOnClick("imgFile" .. i, function()
+				
+			end)
+		end
+		if string.len(fileList[i]) > 7 then
+			text = string.sub(fileList[i], 1, 7)
+		else
+			text = fileList[i]
+		end
+		buttons:changeText("btnFile" .. i, text)
+		x = x + 9
+		if x + 4 > w - 1 then
+			x = 19
+			y = y + 7
+		end
+	end
+end
+
+renderIcons()
+
+while true do
+	render:all(pages, buttons, inputboxes, labels, checkboxes, images, lines)
+	action:pullEvent(pages, buttons, inputboxes, checkboxes, images)
+	if inputboxes:getValue("ibCurrentFolder") ~= currentFolder then
+		if fs.isDir(inputboxes:getValue("ibCurrentFolder")) then
+			currentFolder = inputboxes:getValue("ibCurrentFolder")
+			if string.sub(currentFolder, -1) == "/" then
+				currentFolder = string.sub(currentFolder, 1, string.len(currentFolder) - 1)
+			end
+			inputboxes:changeValue("ibCurrentFolder", currentFolder)
+			renderIcons()
+		else
+			if string.sub(currentFolder, -1) == "/" then
+				currentFolder = string.sub(currentFolder, 1, string.len(currentFolder) - 1)
+			end
+			inputboxes:changeValue("ibCurrentFolder", currentFolder)
+			renderIcons()
+		end
+	end
+end

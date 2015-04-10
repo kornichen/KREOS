@@ -5,7 +5,7 @@
     1,
     "Files",
     "/system/images/icn_filebrowser",
-    false,
+    "/system/files",
     false,
   },
   {

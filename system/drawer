@@ -1,7 +1,7 @@
 -- ========================================
 -- The KreOS 3.0 Skylark Drawer
 -- Written by kornichen
--- Lastly modified on 6th April 2015
+-- Lastly modified on 8th April 2015
 -- Licensed under General Public License V3
 -- ========================================
 
@@ -66,14 +66,25 @@ local function setStatusText(statusText)
 	term.write(statusText)
 end
 
+local langTable = textutils.unserialize(fs.open("/system/config/language-" .. "en", "r").readAll())
+
+local function getLang(langKey)
+	for i = 1, #langTable do
+		if langTable[i][1] == langKey then
+			return langTable[i][2]
+		end
+	end
+	return false
+end
+
 local file = fs.open("/system/config/apps", "r")
 local data = file.readAll()
 file.close()
 local apps = textutils.unserialize(data)
 
-pages:create("drawer", "Home", true, getBgColorFromFile(), true)
+pages:create("drawer", getLang("drawer-home"), true, getBgColorFromFile(), true)
 
-buttons:create("btnDrawerSettings", "drawer", true, 2, 2, "Settings", colors.cyan, colors.gray, function()
+buttons:create("btnDrawerSettings", "drawer", true, 2, 2, getLang("drawer-settings"), colors.cyan, colors.gray, function()
 	pages:disable("drawer")
 	shell.run("/system/settings", "drawer")
 	pages:enable("drawer")
@@ -83,7 +94,7 @@ end)
 local time = ""
 
 if getClockConfigFromFile()[2] then
-	setStatusText("Fetching time")
+	getLang("drawer-fetching-time")
 	time = getTimeFromInternet(getClockConfigFromFile()[3])
 else
 	time = textutils.formatTime(os.time(), getClockConfigFromFile()[1])

@@ -1,7 +1,7 @@
 -- ========================================
 -- The KreOS 3.0 Skylark API
 -- Written by kornichen
--- Lastly modified on 2nd March 2015
+-- Lastly modified on 8th March 2015
 -- Licensed under General Public License V3
 -- ========================================
 
@@ -18,7 +18,8 @@ function init()
 	local images = Image:getObject()
 	local render = Render:getObject()
 	local action = Action:getObject()
-	return pages, buttons, inputboxes, labels, checkboxes, scrollbars, images, render, action
+	local lines = Lines:getObject()
+	return pages, buttons, inputboxes, labels, checkboxes, scrollbars, images, render, action, lines
 end
 
 local function imageGetSize(image)
@@ -454,14 +455,14 @@ Checkbox = {
 Scrollbar = {
 	getObject = function (self, o)
 		o = o or {
-			checkboxes = {}
+			scrollbars = {}
 		}
 		setmetatable(o, self)
 		self.__index = self
 		return o
 	end,
 	getList = function (self)
-		return self.checkboxes
+		return self.scrollbars
 	end
 }
 
@@ -519,6 +520,61 @@ Image = {
 	end
 }
 
+Lines = {
+	getObject = function (self)
+		o = {
+			lines = {}
+		}
+		setmetatable(o, self)
+		self.__index = self
+		return o
+	end,
+	getList = function (self)
+		return self.lines
+	end,
+	create = function (self, internalName, page, enabled, x, y, x2, y2, _color)
+		table.insert(self.lines, {internalName, page, enabled, x, y, x2, y2, _color})
+	end,
+	enable = function (self, internalName)
+		for i = 1, #self.lines do
+			if self.lines[i][1] == internalName then
+				self.lines[i][3] = true
+			end
+		end
+	end,
+	disable = function (self, internalName)
+		for i = 1, #self.lines do
+			if self.lines[i][1] == internalName then
+				self.lines[i][3] = false
+			end
+		end
+	end,
+	changePosition = function (self, internalName, x, y, x2, y2)
+		for i = 1, #self.lines do
+			if self.lines[i][1] == internalName then
+				self.lines[i][4] = x
+				self.lines[i][5] = y
+				self.lines[i][6] = x2
+				self.lines[i][7] = y2
+			end
+		end
+	end,
+	changeColor = function (self, internalName, _color)
+		for i = 1, #self.lines do
+			if self.lines[i][1] == internalName then
+				self.lines[i][8] = _color
+			end
+		end
+	end,
+	changeColour = function (self, internalName, _color)
+		for i = 1, #self.lines do
+			if self.lines[i][1] == internalName then
+				self.lines[i][8] = _color
+			end
+		end
+	end
+}
+
 Render = {
 	getObject = function (self)
 		o = {}
@@ -526,12 +582,13 @@ Render = {
 		self.__index = self
 		return o
 	end,
-	all = function (self, page, button, inputbox, label, checkbox, images)
+	all = function (self, page, button, inputbox, label, checkbox, images, lines)
 		button = button or false
 		inputbox = inputbox or false
 		label = label or false
 		checkbox = checkbox or false
 		images = images or false
+		lines = lines or false
 
 		term.clear()
 		for i = 1, #page:getList() do
@@ -552,6 +609,20 @@ Render = {
 					term.clearLine()
 					term.setCursorPos((w / 2) - (string.len(page:getList()[i][2]) / 2), 1)
 					term.write(page:getList()[i][2])
+				end
+				-- Draw lines
+				if lines ~= false then
+					for j = 1, #lines:getList() do
+						if lines:getList()[j][2] == page:getList()[i][1] and lines:getList()[j][3] then
+							term.setBackgroundColor(lines:getList()[j][8])
+							for y = lines:getList()[j][5], lines:getList()[j][7] do
+								for x = lines:getList()[j][4], lines:getList()[j][6] do
+									term.setCursorPos(x, y)
+									term.write(" ")
+								end
+							end
+						end
+					end
 				end
 				-- Draw buttons
 				if button ~= false then
